@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personalities — Daniel Nettle</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1510;
+    --paper: #f5f0e8;
+    --cream: #ede7d5;
+    --accent: #8b3a1c;
+    --gold: #c4973b;
+    --muted: #7a7060;
+    --rule: #c8bfa8;
+
+    --e-color: #2d5f8a;   /* Extraversion */
+    --n-color: #8b3a1c;   /* Neuroticism */
+    --c-color: #3a6b3a;   /* Conscientiousness */
+    --a-color: #6b3a8b;   /* Agreeableness */
+    --o-color: #8b7a1c;   /* Openness */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 40px,
+      rgba(255,255,255,.015) 40px, rgba(255,255,255,.015) 41px
+    );
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: .75rem;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.1;
+  }
+  header h1 em { font-style: italic; color: var(--gold); }
+  .header-sub {
+    margin-top: .5rem;
+    color: rgba(245,240,232,.5);
+    font-size: .85rem;
+    letter-spacing: .05em;
+  }
+  .trait-bar-row {
+    display: flex;
+    justify-content: center;
+    gap: .4rem;
+    margin-top: 2rem;
+  }
+  .trait-pip {
+    width: 2.5rem;
+    height: 4px;
+    border-radius: 2px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav a {
+    font-family: 'DM Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--muted);
+    padding: .8rem 1.2rem;
+    white-space: nowrap;
+    transition: color .2s, border-bottom .2s;
+    border-bottom: 2px solid transparent;
+    flex-shrink: 0;
+  }
+  nav a:hover, nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  section { margin-bottom: 3.5rem; }
+  section + section { border-top: 1px solid var(--rule); padding-top: 3rem; }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+    color: var(--ink);
+  }
+  h2 .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: .7rem;
+    color: var(--gold);
+    display: block;
+    letter-spacing: .15em;
+    margin-bottom: .25rem;
+    text-transform: uppercase;
+  }
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    margin: 1.75rem 0 .5rem;
+    color: var(--accent);
+  }
+  p { margin-bottom: .9rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: var(--cream);
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: .9rem;
+  }
+  .callout strong {
+    font-family: 'DM Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: .3rem;
+  }
+
+  /* ── TRAIT CARDS ── */
+  .trait-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .trait-card {
+    border: 1px solid var(--rule);
+    border-top: 4px solid;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: box-shadow .2s, transform .15s;
+    background: #fff;
+  }
+  .trait-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); transform: translateY(-2px); }
+  .trait-card[data-trait="E"] { border-top-color: var(--e-color); }
+  .trait-card[data-trait="N"] { border-top-color: var(--n-color); }
+  .trait-card[data-trait="C"] { border-top-color: var(--c-color); }
+  .trait-card[data-trait="A"] { border-top-color: var(--a-color); }
+  .trait-card[data-trait="O"] { border-top-color: var(--o-color); }
+
+  .trait-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: .15rem;
+  }
+  .trait-card[data-trait="E"] .trait-letter { color: var(--e-color); }
+  .trait-card[data-trait="N"] .trait-letter { color: var(--n-color); }
+  .trait-card[data-trait="C"] .trait-letter { color: var(--c-color); }
+  .trait-card[data-trait="A"] .trait-letter { color: var(--a-color); }
+  .trait-card[data-trait="O"] .trait-letter { color: var(--o-color); }
+
+  .trait-name {
+    font-family: 'DM Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .6rem;
+  }
+  .trait-tagline {
+    font-size: .88rem;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* ── DEEP-DIVE ── */
+  .trait-detail {
+    display: none;
+    margin-top: 1.5rem;
+    border: 1px solid var(--rule);
+    background: #fff;
+    padding: 1.5rem;
+  }
+  .trait-detail.open { display: block; }
+  .trait-detail h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  @media (max-width: 540px) { .two-col { grid-template-columns: 1fr; } }
+  .col-box { background: var(--cream); padding: .9rem 1rem; font-size: .88rem; }
+  .col-box .col-label {
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .35rem;
+  }
+
+  /* ── SELF-REVIEW ── */
+  #self-review { background: var(--ink); color: var(--paper); padding: 2.5rem 1.75rem; margin: 0 -1.25rem; }
+  #self-review h2 { color: var(--paper); }
+  #self-review h2 .section-num { color: var(--gold); }
+  .slider-block { margin: 1.5rem 0; }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: .4rem;
+  }
+  .slider-trait-name {
+    font-family: 'DM Mono', monospace;
+    font-size: .75rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .slider-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    min-width: 2rem;
+    text-align: right;
+  }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+    cursor: pointer;
+  }
+  .slider-e { background: linear-gradient(to right, #2d5f8a, #2d5f8a); }
+  .slider-e::-webkit-slider-thumb { background: #2d5f8a; }
+  .slider-n { background: linear-gradient(to right, #8b3a1c, #8b3a1c); }
+  .slider-n::-webkit-slider-thumb { background: #8b3a1c; }
+  .slider-c { background: linear-gradient(to right, #3a6b3a, #3a6b3a); }
+  .slider-c::-webkit-slider-thumb { background: #3a6b3a; }
+  .slider-a { background: linear-gradient(to right, #6b3a8b, #6b3a8b); }
+  .slider-a::-webkit-slider-thumb { background: #6b3a8b; }
+  .slider-o { background: linear-gradient(to right, #8b7a1c, #8b7a1c); }
+  .slider-o::-webkit-slider-thumb { background: #8b7a1c; }
+
+  .slider-pole-labels { display: flex; justify-content: space-between; font-size: .7rem; color: rgba(245,240,232,.4); margin-top: .2rem; font-family: 'DM Mono', monospace; }
+
+  #generate-btn {
+    display: block;
+    margin: 2rem auto 0;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    padding: .8rem 2.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .8rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  #generate-btn:hover { background: #d4a94b; transform: scale(1.02); }
+
+  #profile-output {
+    margin-top: 2rem;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    padding: 1.5rem;
+    font-size: .9rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    display: none;
+  }
+  #profile-output.visible { display: block; }
+
+  /* ── QUOTES ── */
+  blockquote {
+    border-left: 2px solid var(--gold);
+    padding: .5rem 0 .5rem 1.25rem;
+    margin: 1.25rem 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--accent);
+  }
+
+  /* ── LISTS ── */
+  ul.notes { list-style: none; padding: 0; }
+  ul.notes li {
+    padding: .35rem 0 .35rem 1.2rem;
+    position: relative;
+    font-size: .92rem;
+  }
+  ul.notes li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .1em;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="header-eyebrow">Book Notes &amp; Self-Review Tool</p>
+  <h1><em>Personalities</em></h1>
+  <p class="header-sub">Daniel Nettle · Oxford University Press · 2007</p>
+  <div class="trait-bar-row">
+    <div class="trait-pip" style="background:var(--e-color)"></div>
+    <div class="trait-pip" style="background:var(--n-color)"></div>
+    <div class="trait-pip" style="background:var(--c-color)"></div>
+    <div class="trait-pip" style="background:var(--a-color)"></div>
+    <div class="trait-pip" style="background:var(--o-color)"></div>
+  </div>
+</header>
+
+<nav id="main-nav">
+  <a href="#overview">Overview</a>
+  <a href="#framework">Framework</a>
+  <a href="#traits">The Five Traits</a>
+  <a href="#evolution">Evolution</a>
+  <a href="#wellbeing">Wellbeing</a>
+  <a href="#society">Society</a>
+  <a href="#action">Actionable Takeaways</a>
+  <a href="#self-review">Self-Review</a>
+</nav>
+
+<main>
+
+<!-- ── OVERVIEW ── -->
+<section id="overview">
+  <h2><span class="section-num">01 · Overview</span>What the book argues</h2>
+  <p>Nettle's central thesis is that the Big Five personality dimensions — Extraversion, Neuroticism, Conscientiousness, Agreeableness, and Openness — are not just convenient labels. They are <em>real biological tendencies</em> shaped by natural selection, heritable across generations, stable across adult life, and predictive of major life outcomes: health, wealth, relationships, and happiness.</p>
+  <p>The book rejects the folk-psychology assumption that personality is mainly shaped by upbringing or conscious choice. Twin studies and behavioural genetics show that around <strong>50% of variance</strong> in personality is genetic. What parents do matters far less than we assume; genes and peer environments matter far more.</p>
+  <div class="callout">
+    <strong>Core claim</strong>
+    No personality profile is universally "best." Every trait position exists because it was adaptive under some conditions. High Neuroticism has real costs <em>and</em> real benefits. So does extreme Extraversion. Understanding the tradeoffs is the practical payoff of the book.
+  </div>
+  <h3>Why the Big Five?</h3>
+  <p>Decades of psycholexical research (starting with Allport and Odbert in the 1930s) showed that across dozens of languages and cultures, five broad factors reliably emerge when people describe each other. These are not arbitrary categories — they map onto how the brain's motivational systems vary across individuals. Nettle traces each trait to its neurobiological substrate (e.g., dopamine for Extraversion, serotonin/threat detection for Neuroticism).</p>
+</section>
+
+<!-- ── FRAMEWORK ── -->
+<section id="framework">
+  <h2><span class="section-num">02 · Framework</span>How to think about the model</h2>
+  <h3>Traits as dimensions, not types</h3>
+  <p>Each of the Big Five is a <em>continuous dimension</em>, not a binary type. Most people cluster around the middle of each scale. The descriptions of "high" and "low" refer to the extreme ends — useful for understanding mechanisms, but remember you are a blend of all five.</p>
+  <h3>Independent axes</h3>
+  <p>The five factors are largely orthogonal — knowing someone is high in Extraversion tells you almost nothing about their Neuroticism score. This is why five numbers are needed, not one. The dimensions capture genuinely different aspects of personality.</p>
+  <h3>Stability</h3>
+  <p>Personality is relatively stable across adulthood, especially after age 30. There is modest maturation: on average, people become slightly higher in Conscientiousness and Agreeableness and slightly lower in Neuroticism as they age. But the rank ordering within a population remains remarkably stable — a highly neurotic 25-year-old is very likely to be a highly neurotic 60-year-old relative to peers.</p>
+  <div class="callout">
+    <strong>Practical note</strong>
+    Because traits are stable, the goal is not necessarily to change your trait level — it is to understand how your profile interacts with your environment, relationships, and goals, and to make better-informed decisions as a result.
+  </div>
+  <h3>Heritability ≠ determinism</h3>
+  <p>Nettle carefully distinguishes heritability from fatalism. A highly heritable trait can still be shaped by environment, effort, and deliberate choice — the heritability figure (≈50%) just means that in the population studied, about half of the variation was due to genetic differences. Individual trajectories can still change, especially through major life transitions.</p>
+</section>
+
+<!-- ── TRAITS ── -->
+<section id="traits">
+  <h2><span class="section-num">03 · The Five Traits</span>Click any card to expand</h2>
+  <p>Each trait is described in terms of its core psychology, neurobiological basis, benefits of being high or low, and life-outcome correlates Nettle covers in the book.</p>
+
+  <div class="trait-grid">
+
+    <div class="trait-card" data-trait="E" onclick="toggleDetail('E')">
+      <div class="trait-letter">E</div>
+      <div class="trait-name">Extraversion</div>
+      <div class="trait-tagline">Sensitivity to reward &amp; social engagement. The dimension of positive energy.</div>
+    </div>
+
+    <div class="trait-card" data-trait="N" onclick="toggleDetail('N')">
+      <div class="trait-letter">N</div>
+      <div class="trait-name">Neuroticism</div>
+      <div class="trait-tagline">Sensitivity to threat &amp; negative emotion. The dimension of emotional volatility.</div>
+    </div>
+
+    <div class="trait-card" data-trait="C" onclick="toggleDetail('C')">
+      <div class="trait-letter">C</div>
+      <div class="trait-name">Conscientiousness</div>
+      <div class="trait-tagline">Self-regulation, goal pursuit &amp; impulse control. The dimension of will.</div>
+    </div>
+
+    <div class="trait-card" data-trait="A" onclick="toggleDetail('A')">
+      <div class="trait-letter">A</div>
+      <div class="trait-name">Agreeableness</div>
+      <div class="trait-tagline">Prosocial orientation, trust &amp; cooperation. The dimension of warmth.</div>
+    </div>
+
+    <div class="trait-card" data-trait="O" onclick="toggleDetail('O')">
+      <div class="trait-letter">O</div>
+      <div class="trait-name">Openness</div>
+      <div class="trait-tagline">Curiosity, creativity &amp; unconventional thinking. The dimension of the imagination.</div>
+    </div>
+
+  </div>
+
+  <!-- EXTRAVERSION DETAIL -->
+  <div class="trait-detail" id="detail-E">
+    <h4 style="color:var(--e-color)">Extraversion — expanded notes</h4>
+    <p><strong>Core psychology:</strong> Extraverts have a more reactive <em>behavioural approach system</em> (BAS) — they feel greater positive affect in response to reward cues: social interaction, status opportunities, novel stimuli. The underlying neurobiology involves dopamine pathways.</p>
+    <p><strong>Not just "talkativeness":</strong> Extraversion predicts thrill-seeking, higher positive mood baseline, larger social networks, and pursuit of leadership roles. Introverts are not fundamentally shy or anxious — low Extraversion simply means lower sensitivity to reward signals, not higher threat sensitivity (that's Neuroticism).</p>
+    <div class="two-col">
+      <div class="col-box">
+        <div class="col-label">Benefits of being high</div>
+        More social connections and support · higher reported positive affect · more likely to take opportunities · natural leadership roles · resilience through social buffering of stress
+      </div>
+      <div class="col-box">
+        <div class="col-label">Benefits of being low</div>
+        Less vulnerable to impulsive decisions · more comfortable with solitude and deep work · less dependent on social validation · lower risk of substance abuse / thrill-seeking harms
+      </div>
+    </div>
+    <p><strong>Life outcomes (Nettle's evidence):</strong> Extraverts report higher subjective well-being on average, but are more likely to experience accidents, risky behaviour consequences, and failed relationships due to pursuit of novelty. The reward system that makes them feel great also pulls them toward overconsumption.</p>
+    <p><strong>Evolutionary logic:</strong> Being highly reward-sensitive was adaptive when resources and mates were scarce and required active pursuit. Being less sensitive was adaptive when environmental risk was high and caution conserved energy.</p>
+    <div class="callout">
+      <strong>Self-reflection prompt</strong>
+      Do you re-energise through social contact or through solitude? Do you find yourself restless unless stimulated? Are you drawn to leadership or prefer working behind the scenes? These are Extraversion signals.
+    </div>
+  </div>
+
+  <!-- NEUROTICISM DETAIL -->
+  <div class="trait-detail" id="detail-N">
+    <h4 style="color:var(--n-color)">Neuroticism — expanded notes</h4>
+    <p><strong>Core psychology:</strong> High Neuroticism means the <em>behavioural inhibition system</em> (BIS) — the brain's threat detector — is more easily triggered. People high in N experience anxiety, sadness, anger, and guilt more intensely and for longer in response to negative events. Serotonin systems play a key role.</p>
+    <p><strong>Most consequential trait:</strong> Nettle argues Neuroticism has the strongest and most consistent links to life outcomes — most negatively for wellbeing and relationship stability, but with important countervailing benefits.</p>
+    <div class="two-col">
+      <div class="col-box">
+        <div class="col-label">Benefits of being high</div>
+        Heightened vigilance to real threats · stronger motivation to prepare and plan · increased creativity (negative rumination can fuel art and problem-solving) · greater empathy through emotional sensitivity · may avoid dangers that emotionally flat peers miss
+      </div>
+      <div class="col-box">
+        <div class="col-label">Benefits of being low</div>
+        Emotional stability under pressure · higher baseline happiness · better relationship satisfaction · more resilient to setbacks · better physical health outcomes over time
+      </div>
+    </div>
+    <p><strong>The writer's trait:</strong> Nettle notes that many great artists and writers score very high in Neuroticism. The same emotional sensitivity that causes suffering also fuels creative insight. This is not romanticisation — the suffering is real — but it illustrates the tradeoff nature of the trait.</p>
+    <p><strong>Critical distinction:</strong> Neuroticism is about the <em>intensity</em> and <em>duration</em> of negative emotions, not their frequency. High-N people don't necessarily have harder lives — they feel the same events more acutely and take longer to return to baseline.</p>
+    <div class="callout">
+      <strong>Self-reflection prompt</strong>
+      How long does it take you to recover from criticism, conflict, or bad news? Do minor frustrations stay with you? Do you find yourself rehearsing conversations or imagining worst-case scenarios? These are high Neuroticism signals.
+    </div>
+  </div>
+
+  <!-- CONSCIENTIOUSNESS DETAIL -->
+  <div class="trait-detail" id="detail-C">
+    <h4 style="color:var(--c-color)">Conscientiousness — expanded notes</h4>
+    <p><strong>Core psychology:</strong> Conscientiousness captures individual differences in the capacity for <em>self-regulation</em> — delaying gratification, following through on plans, adhering to norms, and suppressing impulses in favour of long-term goals. It involves the prefrontal cortex's executive control over limbic impulses.</p>
+    <p><strong>The "socially desirable" trait:</strong> Unlike most Big Five traits which have clear costs at both extremes, Conscientiousness is unusual in being nearly universally beneficial in modern Western contexts. High C is associated with better school and work performance, longer life, better health behaviours, and more stable relationships.</p>
+    <div class="two-col">
+      <div class="col-box">
+        <div class="col-label">Benefits of being high</div>
+        Academic and professional achievement · longer life expectancy · better health habits · more reliable relationships · greater income over a lifetime
+      </div>
+      <div class="col-box">
+        <div class="col-label">Benefits of being low</div>
+        More flexible and spontaneous · less prone to rigid rule-following in novel situations · potentially more creative in unstructured environments · may be more fun in social contexts · less likely to over-control others
+      </div>
+    </div>
+    <p><strong>Evolutionary note:</strong> In ancestral environments, extremely high Conscientiousness could be maladaptive — too much caution and rule-following in a rapidly changing environment is costly. The trait's "optimal" level depends heavily on environmental stability.</p>
+    <blockquote>"Conscientiousness is the one trait where there is a fairly consistent gradient of better outcomes at higher levels — at least in contemporary Western societies."</blockquote>
+    <div class="callout">
+      <strong>Self-reflection prompt</strong>
+      Do you generally follow through on commitments? Can you work steadily toward long-term goals even without external deadlines? Do you find it easy or hard to resist immediate pleasures? Your answers track Conscientiousness.
+    </div>
+  </div>
+
+  <!-- AGREEABLENESS DETAIL -->
+  <div class="trait-detail" id="detail-A">
+    <h4 style="color:var(--a-color)">Agreeableness — expanded notes</h4>
+    <p><strong>Core psychology:</strong> Agreeableness captures the degree to which individuals are oriented toward others' welfare, trust, cooperation, and social harmony versus their own self-interest, competition, and scepticism. High-A individuals are warm, empathic, and accommodating; low-A individuals are more competitive, sceptical, and willing to pursue their own interests at others' expense.</p>
+    <p><strong>Not just "niceness":</strong> Low Agreeableness is not the same as malice. It can manifest as healthy assertiveness, competitive drive, and a realistic (rather than idealised) view of others' motives.</p>
+    <div class="two-col">
+      <div class="col-box">
+        <div class="col-label">Benefits of being high</div>
+        More harmonious relationships · greater social support network · seen as trustworthy and likeable · cooperation benefits in group settings · associated with lower interpersonal conflict
+      </div>
+      <div class="col-box">
+        <div class="col-label">Benefits of being low</div>
+        More willing to pursue self-interest in negotiations · less vulnerable to exploitation · more realistic about others' motives · tends toward higher earnings (less willing to accept unfair offers) · can be more effective in competitive environments
+      </div>
+    </div>
+    <p><strong>The earnings finding:</strong> One of the most striking findings Nettle cites: low Agreeableness (particularly in men) is associated with higher income. Being willing to negotiate hard, pursue self-interest, and not prioritise social harmony pays off materially — at some cost to relationships.</p>
+    <p><strong>Gender and culture:</strong> Women score higher in Agreeableness on average across virtually all cultures studied. The gap is not easily explained by socialisation alone — it appears in infancy and is cross-culturally robust, suggesting a biological component.</p>
+    <div class="callout">
+      <strong>Self-reflection prompt</strong>
+      Do you find it easy to trust people you've just met? Do you avoid conflict even when you'd benefit from asserting yourself? Do you tend to assume the best of people's motives? These signal high Agreeableness.
+    </div>
+  </div>
+
+  <!-- OPENNESS DETAIL -->
+  <div class="trait-detail" id="detail-O">
+    <h4 style="color:var(--o-color)">Openness — expanded notes</h4>
+    <p><strong>Core psychology:</strong> Openness to Experience (sometimes called Intellect/Imagination) captures curiosity, aesthetic sensitivity, preference for novelty and variety, unconventional thinking, and richness of inner experience. High-O individuals are drawn to ideas, art, and unusual experiences; low-O individuals prefer the familiar, concrete, and conventional.</p>
+    <p><strong>The cognitive trait:</strong> Openness is the Big Five factor most correlated with IQ (though they are not the same thing). High-O individuals tend to think in more abstract, metaphorical, and associative ways. They are overrepresented in creative, artistic, and scientific professions.</p>
+    <div class="two-col">
+      <div class="col-box">
+        <div class="col-label">Benefits of being high</div>
+        Creative and artistic achievement · comfort with ambiguity and complexity · richer inner life · more adaptable to novel environments · associated with political and social liberalism
+      </div>
+      <div class="col-box">
+        <div class="col-label">Benefits of being low</div>
+        Practical focus on the concrete and proven · greater consistency and predictability · comfortable with tradition and structure · often more effective in routine-based, detail-oriented roles · less likely to pursue impractical or risky novel ventures
+      </div>
+    </div>
+    <p><strong>Schizotypy link:</strong> Nettle discusses the relationship between high Openness and "schizotypy" — a subclinical tendency toward unusual perceptual experiences and loose associative thinking. This same cognitive style that produces creativity also, at the extreme, shades into psychotic-spectrum thinking. The genetics of creativity and psychosis overlap.</p>
+    <blockquote>"The same genetic variations that predispose people to schizophrenia also, at lower doses, seem to predispose people to the kind of divergent thinking we call creativity."</blockquote>
+    <div class="callout">
+      <strong>Self-reflection prompt</strong>
+      Are you drawn to abstract ideas, art, and unconventional perspectives? Do you enjoy exploring hypotheticals and thought experiments? Do you find routine intellectually suffocating, or comforting? These probe your Openness level.
+    </div>
+  </div>
+
+</section>
+
+<!-- ── EVOLUTION ── -->
+<section id="evolution">
+  <h2><span class="section-num">04 · Evolution</span>Why variation persists</h2>
+  <p>One of Nettle's most original contributions is his evolutionary analysis. If personality traits affect fitness, why hasn't natural selection driven the population to a single optimal personality type? He offers three complementary answers:</p>
+
+  <h3>1. Frequency-dependent selection</h3>
+  <p>The fitness value of a strategy depends on how common it is in the population. In a group of mostly trusting people, being exploitative (low Agreeableness) pays. But as exploiters increase, trust decreases and the strategy becomes less profitable. This creates <em>stable polymorphisms</em> — balanced mixtures of strategies — rather than one winner.</p>
+
+  <h3>2. Environmental heterogeneity</h3>
+  <p>Different environments favour different personalities. Boom times reward risk-taking (high Extraversion, low Conscientiousness). Dangerous or resource-scarce environments reward caution. Since environments fluctuate, genetic diversity in personality is maintained.</p>
+
+  <h3>3. Pleiotropic tradeoffs</h3>
+  <p>Each trait involves genuine tradeoffs where the same genes produce benefits and costs in different domains. Neuroticism's threat-sensitivity protects against real dangers. Extraversion's reward-seeking secures real resources. Natural selection cannot increase one benefit without incurring the associated cost, so both high and low variants persist.</p>
+
+  <div class="callout">
+    <strong>Key implication</strong>
+    There is no evolutionarily or morally "correct" personality. The persistent diversity of human personalities is not a bug or a failure of socialisation — it is the expected output of evolutionary processes operating on genuinely tradeoff-laden traits.
+  </div>
+</section>
+
+<!-- ── WELLBEING ── -->
+<section id="wellbeing">
+  <h2><span class="section-num">05 · Wellbeing</span>Happiness, relationships &amp; health</h2>
+
+  <h3>Happiness</h3>
+  <p>The strongest predictors of subjective wellbeing from the Big Five are <strong>low Neuroticism</strong> (most important) and <strong>high Extraversion</strong>. These two traits together account for a substantial portion of variance in long-term life satisfaction. Conscientiousness and Agreeableness contribute more modestly. Openness has a weak and inconsistent relationship with happiness.</p>
+  <p>Nettle emphasises that this doesn't mean unhappy people should "just try harder" — Neuroticism is substantially heritable and represents a real difference in how the emotional system processes experience, not a cognitive error that can be simply corrected.</p>
+
+  <h3>Relationships</h3>
+  <ul class="notes">
+    <li>High Neuroticism is the most consistent predictor of relationship dissatisfaction and divorce, for both partners.</li>
+    <li>Low Agreeableness predicts conflict, infidelity, and partner dissatisfaction.</li>
+    <li>High Conscientiousness predicts relationship reliability and stability.</li>
+    <li>Similarity in Openness and Agreeableness between partners predicts relationship quality more than similarity on other traits.</li>
+  </ul>
+
+  <h3>Physical health</h3>
+  <ul class="notes">
+    <li>High Conscientiousness is one of the strongest personality predictors of longevity — comparable in effect size to smoking status.</li>
+    <li>High Neuroticism is associated with worse health outcomes, partly through stress physiology and partly through unhealthy coping behaviours.</li>
+    <li>High Extraversion is associated with more accidents and risky behaviour, partially offsetting its wellbeing benefits.</li>
+  </ul>
+
+  <div class="callout">
+    <strong>Actionable insight</strong>
+    If you score high in Neuroticism, the evidence-based interventions are not "thinking positively" but: reducing exposure to unnecessary stressors, building stable routines, and using cognitive-behavioural strategies to interrupt rumination loops. The goal is not to change the trait but to manage its expression.
+  </div>
+</section>
+
+<!-- ── SOCIETY ── -->
+<section id="society">
+  <h2><span class="section-num">06 · Society</span>Personality at the collective level</h2>
+  <p>Nettle extends the analysis from individuals to groups and societies. Different societies have measurably different average personality profiles, and these aggregate differences have real-world consequences.</p>
+
+  <h3>Politics and personality</h3>
+  <p>High Openness correlates with political liberalism; low Openness with political conservatism. This is one of the most robust findings in political psychology. The correlation holds across cultures. It does not mean one side is "smarter" — it means genuinely different cognitive styles (novelty-seeking vs. preference for the familiar and proven) map onto different political orientations.</p>
+
+  <h3>Occupational sorting</h3>
+  <p>Personalities sort powerfully into occupations. High-C, low-N individuals cluster in medicine, law, and management. High-O individuals cluster in arts, academia, and research. High-E individuals cluster in sales, politics, and entertainment. Low-A individuals are overrepresented in finance and competitive business. These are not stereotypes — they emerge consistently from large-sample studies.</p>
+
+  <h3>The diversity dividend</h3>
+  <p>Nettle argues that personality diversity in groups is functionally valuable. Groups that are too homogeneous — all risk-takers, or all cautious — perform worse than groups with a range of personality types. The same logic that explains why evolution maintains personality variation within a species applies to organisational teams.</p>
+</section>
+
+<!-- ── ACTIONABLE TAKEAWAYS ── -->
+<section id="action">
+  <h2><span class="section-num">07 · Actionable Takeaways</span>What to do with this</h2>
+
+  <h3>Know your profile, not just your label</h3>
+  <p>A Big Five score is not a diagnosis or a destiny — it is a map of your default tendencies. Knowing you are high in Neuroticism, for example, tells you that you will likely experience negative events more intensely than the average person. This is not a flaw to fix but a fact to work with: you can build environments, relationships, and habits that reduce unnecessary stressor exposure.</p>
+
+  <h3>Match environments to traits where possible</h3>
+  <p>High Extraversion + routine, isolated work = friction. High Conscientiousness + unstructured, deadline-free environments = underperformance. High Openness + rigid, rule-bound roles = frustration. The literature strongly supports <em>person-environment fit</em> as a lever for wellbeing and performance that is often more actionable than trying to change traits themselves.</p>
+
+  <h3>Use your highs; manage your lows</h3>
+  <ul class="notes">
+    <li><strong>High N:</strong> Acknowledge the emotional intensity without suppressing it; use CBT-style techniques to interrupt catastrophising; build physical and social stability as a buffer.</li>
+    <li><strong>Low C:</strong> Externalise self-regulation (use systems, commitments, deadlines, accountability partners) rather than relying on willpower.</li>
+    <li><strong>Low A:</strong> Be aware of how your directness lands on others; in collaborative contexts, model others' perspective explicitly.</li>
+    <li><strong>Low E:</strong> Recognise that your need for solitude is not a social failure; design recovery time intentionally; don't over-schedule social obligations.</li>
+    <li><strong>Low O:</strong> Recognise when novelty-aversion is limiting options; deliberately expose yourself to unfamiliar ideas as a structured practice.</li>
+  </ul>
+
+  <h3>Understand others through the framework</h3>
+  <p>When someone's behaviour frustrates you, ask which trait difference might explain it. A colleague who seems chaotic may be low in Conscientiousness, not incompetent. A partner who seems emotionally volatile may be high in Neuroticism, not manipulative. The framework builds empathy by replacing moral judgements with mechanistic understanding.</p>
+
+  <h3>Don't over-pathologise or over-celebrate</h3>
+  <p>Every trait extreme has genuine costs. The goal of Nettle's analysis is not to make you proud of your personality or ashamed of it — but to see it clearly, understand its tradeoffs, and make better-informed choices about how to live with it.</p>
+</section>
+
+<!-- ── SELF-REVIEW ── -->
+<section id="self-review">
+  <h2><span class="section-num">08 · Self-Review</span>Reflect on your own Big Five results</h2>
+  <p style="color:rgba(245,240,232,.7); margin-bottom:1.5rem;">Enter your percentile scores (0–100) or rough position on each dimension. If you have an actual test result, enter those numbers. Otherwise use your best intuitive estimate. The tool will generate a Nettle-informed personalised reflection.</p>
+
+  <div class="slider-block">
+    <div class="slider-label">
+      <span class="slider-trait-name" style="color:#6fa8d4">E · Extraversion</span>
+      <span class="slider-value" id="val-E">50</span>
+    </div>
+    <input type="range" min="0" max="100" value="50" class="slider-e" id="slider-E" oninput="updateVal('E',this.value)">
+    <div class="slider-pole-labels"><span>Introvert</span><span>Extravert</span></div>
+  </div>
+
+  <div class="slider-block">
+    <div class="slider-label">
+      <span class="slider-trait-name" style="color:#d47a5a">N · Neuroticism</span>
+      <span class="slider-value" id="val-N">50</span>
+    </div>
+    <input type="range" min="0" max="100" value="50" class="slider-n" id="slider-N" oninput="updateVal('N',this.value)">
+    <div class="slider-pole-labels"><span>Emotionally stable</span><span>Neurotic</span></div>
+  </div>
+
+  <div class="slider-block">
+    <div class="slider-label">
+      <span class="slider-trait-name" style="color:#7ab47a">C · Conscientiousness</span>
+      <span class="slider-value" id="val-C">50</span>
+    </div>
+    <input type="range" min="0" max="100" value="50" class="slider-c" id="slider-C" oninput="updateVal('C',this.value)">
+    <div class="slider-pole-labels"><span>Spontaneous</span><span>Conscientious</span></div>
+  </div>
+
+  <div class="slider-block">
+    <div class="slider-label">
+      <span class="slider-trait-name" style="color:#a87ad4">A · Agreeableness</span>
+      <span class="slider-value" id="val-A">50</span>
+    </div>
+    <input type="range" min="0" max="100" value="50" class="slider-a" id="slider-A" oninput="updateVal('A',this.value)">
+    <div class="slider-pole-labels"><span>Competitive</span><span>Agreeable</span></div>
+  </div>
+
+  <div class="slider-block">
+    <div class="slider-label">
+      <span class="slider-trait-name" style="color:#c4b44a">O · Openness</span>
+      <span class="slider-value" id="val-O">50</span>
+    </div>
+    <input type="range" min="0" max="100" value="50" class="slider-o" id="slider-O" oninput="updateVal('O',this.value)">
+    <div class="slider-pole-labels"><span>Conventional</span><span>Open</span></div>
+  </div>
+
+  <button id="generate-btn" onclick="generateProfile()">Generate My Nettle-Informed Reflection</button>
+
+  <pre id="profile-output"></pre>
+</section>
+
+</main>
+
+<footer>
+  Notes based on Daniel Nettle, <em>Personalities: What Makes You the Way You Are</em> (OUP, 2007) · For personal study only
+</footer>
+
+<script>
+function updateVal(trait, val) {
+  document.getElementById('val-' + trait).textContent = val;
+}
+
+function toggleDetail(trait) {
+  const el = document.getElementById('detail-' + trait);
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.trait-detail').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+  if (!wasOpen) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function getLabel(val) {
+  if (val >= 75) return 'high';
+  if (val >= 55) return 'moderately high';
+  if (val >= 45) return 'average';
+  if (val >= 25) return 'moderately low';
+  return 'low';
+}
+
+function generateProfile() {
+  const E = parseInt(document.getElementById('slider-E').value);
+  const N = parseInt(document.getElementById('slider-N').value);
+  const C = parseInt(document.getElementById('slider-C').value);
+  const A = parseInt(document.getElementById('slider-A').value);
+  const O = parseInt(document.getElementById('slider-O').value);
+
+  const lE = getLabel(E), lN = getLabel(N), lC = getLabel(C), lA = getLabel(A), lO = getLabel(O);
+
+  const lines = [];
+
+  lines.push('═══════════════════════════════════');
+  lines.push('  YOUR BIG FIVE — NETTLE REFLECTION');
+  lines.push('═══════════════════════════════════\n');
+  lines.push(`  E ${E.toString().padStart(3)}  |  N ${N.toString().padStart(3)}  |  C ${C.toString().padStart(3)}  |  A ${A.toString().padStart(3)}  |  O ${O.toString().padStart(3)}\n`);
+
+  // EXTRAVERSION
+  lines.push('── EXTRAVERSION (' + lE.toUpperCase() + ') ──');
+  if (E >= 70) {
+    lines.push('You have a highly reactive reward system. Social engagement, novelty, and status opportunities energise you significantly. Per Nettle, this gives you real advantages in social capital and positive mood — but be aware of your vulnerability to over-pursuing stimulation, impulsive decisions, and thrill-related risks. Your challenge is channelling the reward drive strategically.');
+  } else if (E >= 45) {
+    lines.push('You sit around the midpoint of Extraversion — drawing energy from social contact while also valuing your own space. You likely adapt well to both collaborative and solo contexts. Nettle\'s framework suggests you have the flexibility to benefit from the social buffering of stress without excessive risk-seeking.');
+  } else {
+    lines.push('You have a less reactive approach system — solitude is restorative rather than draining. You are not less socially capable; you simply need less social input to feel good. Nettle notes low Extraverts are less vulnerable to impulsive reward-seeking. Protect your recovery time deliberately and don\'t over-schedule yourself to meet social expectations.');
+  }
+  lines.push('');
+
+  // NEUROTICISM
+  lines.push('── NEUROTICISM (' + lN.toUpperCase() + ') ──');
+  if (N >= 70) {
+    lines.push('Your threat-detection system is highly sensitive. Negative events will tend to feel more intense and linger longer than they do for lower-N individuals — this is biological, not a character flaw. Nettle\'s analysis: your vigilance has real benefits (you notice genuine threats, you may be more empathic), but the costs in wellbeing are real. Practical priority: build environmental stability, use structured routines to reduce ambient stress, and invest in evidence-based techniques (CBT, mindfulness) to interrupt rumination. Don\'t try to suppress emotions — redirect the processing.');
+  } else if (N >= 45) {
+    lines.push('You experience negative emotions with typical intensity. You are probably affected by setbacks but recover at a normal pace. Nettle\'s framework suggests you are not especially at risk from Neuroticism\'s costs, but monitoring stress load remains important — moderate Neuroticism can still produce significant distress under sustained pressure.');
+  } else {
+    lines.push('Your emotional system is relatively stable — you return to baseline quickly after setbacks and are unlikely to catastrophise. Nettle\'s data suggests this is one of the most powerful wellbeing assets. The risk to watch: you may underestimate others\' emotional experiences, or dismiss genuine threats that more vigilant people would flag. Practice perspective-taking with high-N people around you.');
+  }
+  lines.push('');
+
+  // CONSCIENTIOUSNESS
+  lines.push('── CONSCIENTIOUSNESS (' + lC.toUpperCase() + ') ──');
+  if (C >= 70) {
+    lines.push('You have strong self-regulatory capacity — follow-through, planning, and impulse control are likely natural strengths. Nettle\'s data gives clear good news: high C is the most consistent personality predictor of long-term success and health. Watch out for rigidity — in novel or ambiguous environments, over-reliance on rules can be limiting. Also, guard against applying your standards to others in ways that create friction.');
+  } else if (C >= 45) {
+    lines.push('You have moderate self-regulation. You can follow through on commitments but may find sustained effort without external structure challenging. Nettle\'s practical implication: design your environment to externalise some of the regulation (deadlines, accountability, systems) rather than relying solely on willpower, which is a limited resource for everyone.');
+  } else {
+    lines.push('Impulse control and long-term planning are areas where you likely face friction. Nettle notes low C has real costs in contemporary societies (income, health, relationship stability). The practical intervention is structural, not motivational: build external systems that do the regulatory work (automating savings, using calendars as commitments, finding accountability partners). Don\'t rely on "trying harder".');
+  }
+  lines.push('');
+
+  // AGREEABLENESS
+  lines.push('── AGREEABLENESS (' + lA.toUpperCase() + ') ──');
+  if (A >= 70) {
+    lines.push('You are strongly oriented toward social harmony, trust, and others\' welfare. Your relationships are likely warmer and lower-conflict, and others experience you as trustworthy. Nettle\'s finding to be aware of: high Agreeableness is associated with lower earnings, in part because you may be less willing to negotiate assertively or pursue your own interests in zero-sum situations. Deliberately practise asserting your needs, especially in professional contexts.');
+  } else if (A >= 45) {
+    lines.push('You balance prosocial orientation with self-interest reasonably well. You can cooperate when needed but also advocate for yourself. Nettle\'s framework suggests this midpoint involves few dramatic costs or benefits specific to Agreeableness — your outcomes in this domain will likely be driven more by the other four traits.');
+  } else {
+    lines.push('You are relatively competitive and sceptical — more focused on your own interests than on social harmony. Nettle\'s surprising finding: this is associated with higher earnings and can be adaptive in competitive environments. The cost is in relationship quality and social support. Deliberately invest in relationships without an agenda; the security of a strong social network has wellbeing returns that are easy for low-A individuals to undervalue.');
+  }
+  lines.push('');
+
+  // OPENNESS
+  lines.push('── OPENNESS (' + lO.toUpperCase() + ') ──');
+  if (O >= 70) {
+    lines.push('You have a strong appetite for novelty, ideas, and unconventional experience. Nettle\'s analysis: high Openness is linked to creative achievement and adaptability in novel environments. The risk: it is also linked to "schizotypy" — a tendency toward loose, associative thinking that at subclinical levels fuels creativity but at the extreme can undermine clear judgment. Also, high-O individuals can struggle with the mundane execution needed to see ideas through — pairing with high-C habits or high-C collaborators is often key.');
+  } else if (O >= 45) {
+    lines.push('You have moderate openness — comfortable with some novelty and intellectual exploration but also grounded in the concrete. This is a useful position: you can engage with abstract ideas without losing the practical thread. Nettle\'s data doesn\'t suggest dramatic risks or benefits at this level on Openness specifically.');
+  } else {
+    lines.push('You prefer the familiar, concrete, and proven. Nettle notes low Openness is associated with comfort in stable, routine environments and respect for tradition — genuinely adaptive traits in many contexts. The risk: in rapidly changing environments, novelty-aversion can limit your ability to adapt. Deliberately exposing yourself to unfamiliar ideas as a scheduled practice (rather than waiting to feel curious) can help maintain cognitive flexibility.');
+  }
+  lines.push('');
+
+  // PROFILE INTERACTIONS
+  lines.push('── PROFILE INTERACTIONS ──');
+  if (N >= 65 && E >= 65) {
+    lines.push('High N + High E: You feel strongly positive and strongly negative emotions. This is the "intense experience" profile — great highs, real lows. Channel the Extraversion\'s social energy to buffer the Neuroticism\'s stress reactivity.');
+  }
+  if (N >= 65 && C >= 65) {
+    lines.push('High N + High C: You feel things intensely and work hard to manage them. This combination often produces highly driven, somewhat anxious achievers. The Conscientiousness helps harness the Neurotic energy productively, but watch for perfectionism and burnout.');
+  }
+  if (N <= 35 && E <= 35) {
+    lines.push('Low N + Low E: Calm and introverted — you are unlikely to be derailed by emotion or distracted by social stimulation. This is a profile well-suited to deep, independent work. Relationship investment may need to be intentional.');
+  }
+  if (O >= 65 && C <= 35) {
+    lines.push('High O + Low C: Many ideas, less follow-through — a common creative tension. Externalising structure is especially important for you. Consider project-based accountability systems.');
+  }
+  if (O >= 65 && C >= 65) {
+    lines.push('High O + High C: The unusual combination of creative curiosity and disciplined execution — often the profile of highly productive intellectuals and creative professionals. This is a genuinely advantageous pairing if you can keep the O from generating more ideas than the C can execute.');
+  }
+
+  lines.push('');
+  lines.push('Remember: no profile is optimal. Every position involves tradeoffs.');
+  lines.push('The goal is clarity, not judgment.');
+  lines.push('═══════════════════════════════════');
+
+  const out = document.getElementById('profile-output');
+  out.textContent = lines.join('\n');
+  out.classList.add('visible');
+  out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Nav active state on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

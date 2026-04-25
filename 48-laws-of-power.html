@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 48 Laws of Power — Robert Greene</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:    #18150f;
+  --paper:  #f4efe4;
+  --cream:  #ebe4d0;
+  --parchment: #e0d8c4;
+  --muted:  #7a7260;
+  --rule:   #ccc4ae;
+  --gold:   #b8882e;
+
+  /* 5 category ink-wash colors */
+  --cat-pd: #5a2d14;   /* Power & Dominance — burnt sienna */
+  --cat-dm: #1a3a4a;   /* Deception & Manipulation — deep teal */
+  --cat-ds: #2d4a1e;   /* Defense & Survival — forest */
+  --cat-ri: #4a2d5a;   /* Reputation & Image — aubergine */
+  --cat-st: #3a3010;   /* Strategy & Timing — dark olive */
+
+  --cat-pd-light: #f5ede8;
+  --cat-dm-light: #e8f0f4;
+  --cat-ds-light: #eaf2e6;
+  --cat-ri-light: #f0eaf5;
+  --cat-st-light: #f0ede3;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+  font-size: 15px;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 3.5rem 2rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.025) 39px, rgba(255,255,255,.025) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,.015) 79px, rgba(255,255,255,.015) 80px);
+}
+header::after {
+  content: '⚜';
+  position: absolute;
+  font-size: 18rem;
+  color: rgba(255,255,255,.02);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  line-height: 1;
+}
+.header-inner { position: relative; z-index: 1; }
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .8rem;
+}
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.015em;
+}
+header h1 em { font-style: italic; font-weight: 400; color: var(--gold); }
+.header-author {
+  margin-top: .6rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem;
+  letter-spacing: .15em;
+  color: rgba(244,239,228,.45);
+}
+.header-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem 1.2rem;
+  margin-top: 2rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(244,239,228,.6);
+  cursor: pointer;
+  transition: color .2s;
+}
+.legend-item:hover { color: var(--paper); }
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--cream);
+  border-bottom: 1px solid var(--rule);
+  padding: .65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: .25rem;
+}
+.filter-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .35rem .9rem;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .18s;
+  border-radius: 2px;
+}
+.filter-btn:hover { color: var(--ink); border-color: var(--ink); }
+.filter-btn.active {
+  color: var(--paper);
+  border-color: transparent;
+}
+.filter-btn[data-cat="all"].active { background: var(--ink); }
+.filter-btn[data-cat="pd"].active  { background: var(--cat-pd); }
+.filter-btn[data-cat="dm"].active  { background: var(--cat-dm); }
+.filter-btn[data-cat="ds"].active  { background: var(--cat-ds); }
+.filter-btn[data-cat="ri"].active  { background: var(--cat-ri); }
+.filter-btn[data-cat="st"].active  { background: var(--cat-st); }
+
+/* ── COUNT BAR ── */
+.count-bar {
+  padding: .7rem 1.25rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── GRID ── */
+.grid-wrap { padding: 1.25rem; max-width: 1200px; margin: 0 auto; }
+.laws-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: .85rem;
+}
+
+/* ── LAW CARD ── */
+.law-card {
+  border: 1px solid var(--rule);
+  border-top: 3px solid;
+  background: #fff;
+  padding: 1rem 1rem 1.1rem;
+  cursor: pointer;
+  transition: box-shadow .2s, transform .15s, opacity .25s;
+  position: relative;
+  overflow: hidden;
+}
+.law-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.law-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.1); transform: translateY(-2px); }
+.law-card:hover::after { opacity: 1; }
+.law-card.hidden { display: none; }
+
+.law-card[data-cat="pd"] { border-top-color: var(--cat-pd); }
+.law-card[data-cat="pd"]::after { background: linear-gradient(135deg, var(--cat-pd-light), transparent 60%); }
+.law-card[data-cat="dm"] { border-top-color: var(--cat-dm); }
+.law-card[data-cat="dm"]::after { background: linear-gradient(135deg, var(--cat-dm-light), transparent 60%); }
+.law-card[data-cat="ds"] { border-top-color: var(--cat-ds); }
+.law-card[data-cat="ds"]::after { background: linear-gradient(135deg, var(--cat-ds-light), transparent 60%); }
+.law-card[data-cat="ri"] { border-top-color: var(--cat-ri); }
+.law-card[data-cat="ri"]::after { background: linear-gradient(135deg, var(--cat-ri-light), transparent 60%); }
+.law-card[data-cat="st"] { border-top-color: var(--cat-st); }
+.law-card[data-cat="st"]::after { background: linear-gradient(135deg, var(--cat-st-light), transparent 60%); }
+
+.card-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: .13;
+  position: absolute;
+  right: .75rem;
+  top: .6rem;
+}
+.card-cat-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .45rem;
+  position: relative;
+  z-index: 1;
+}
+.law-card[data-cat="pd"] .card-cat-tag { color: var(--cat-pd); }
+.law-card[data-cat="dm"] .card-cat-tag { color: var(--cat-dm); }
+.law-card[data-cat="ds"] .card-cat-tag { color: var(--cat-ds); }
+.law-card[data-cat="ri"] .card-cat-tag { color: var(--cat-ri); }
+.law-card[data-cat="st"] .card-cat-tag { color: var(--cat-st); }
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: .88rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  position: relative;
+  z-index: 1;
+}
+.card-summary {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: .4rem;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── MODAL ── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(24,21,15,.7);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+.modal-backdrop.open { display: flex; align-items: flex-start; justify-content: center; }
+
+.modal {
+  background: var(--paper);
+  width: 100%;
+  max-width: 640px;
+  position: relative;
+  animation: modalIn .22s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-stripe {
+  height: 5px;
+  width: 100%;
+}
+.modal-head {
+  padding: 1.5rem 1.75rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-num-cat {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .6rem;
+}
+.modal-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: .18;
+}
+.modal-cat-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: .25rem .65rem;
+  border-radius: 2px;
+  color: var(--paper);
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.modal-body { padding: 1.5rem 1.75rem; }
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .35rem;
+  margin-top: 1.25rem;
+  display: block;
+}
+.section-label:first-child { margin-top: 0; }
+
+.modal-summary {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.modal-text {
+  font-size: .88rem;
+  line-height: 1.75;
+  color: #2e2a20;
+}
+.modal-callout {
+  background: var(--cream);
+  border-left: 2px solid var(--gold);
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  line-height: 1.65;
+  margin: .75rem 0 0;
+}
+.modal-reversal {
+  background: var(--parchment);
+  border-left: 2px solid var(--muted);
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  line-height: 1.65;
+  margin-top: .75rem;
+  color: var(--muted);
+}
+
+.modal-close {
+  position: absolute;
+  top: .85rem; right: .85rem;
+  background: none; border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  cursor: pointer;
+  padding: .35rem .6rem;
+  transition: color .15s;
+  text-transform: uppercase;
+}
+.modal-close:hover { color: var(--ink); }
+
+.modal-nav {
+  display: flex;
+  border-top: 1px solid var(--rule);
+  background: var(--cream);
+}
+.modal-nav-btn {
+  flex: 1;
+  padding: .85rem;
+  background: none;
+  border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color .15s, background .15s;
+}
+.modal-nav-btn:hover { color: var(--ink); background: var(--parchment); }
+.modal-nav-btn:first-child { border-right: 1px solid var(--rule); }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+}
+
+@media (max-width: 480px) {
+  .laws-grid { grid-template-columns: 1fr 1fr; }
+  .modal-body { padding: 1.25rem 1.25rem; }
+  .modal-head { padding: 1.25rem 1.25rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="eyebrow">Book Notes &amp; Reference</p>
+    <h1>The 48 Laws<br><em>of Power</em></h1>
+    <p class="header-author">Robert Greene · Viking · 1998</p>
+    <div class="header-legend">
+      <span class="legend-item" onclick="setFilter('pd')">
+        <span class="legend-dot" style="background:var(--cat-pd)"></span> Power &amp; Dominance
+      </span>
+      <span class="legend-item" onclick="setFilter('dm')">
+        <span class="legend-dot" style="background:var(--cat-dm)"></span> Deception &amp; Manipulation
+      </span>
+      <span class="legend-item" onclick="setFilter('ds')">
+        <span class="legend-dot" style="background:var(--cat-ds)"></span> Defense &amp; Survival
+      </span>
+      <span class="legend-item" onclick="setFilter('ri')">
+        <span class="legend-dot" style="background:var(--cat-ri)"></span> Reputation &amp; Image
+      </span>
+      <span class="legend-item" onclick="setFilter('st')">
+        <span class="legend-dot" style="background:var(--cat-st)"></span> Strategy &amp; Timing
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" data-cat="all" onclick="setFilter('all')">All 48</button>
+  <button class="filter-btn" data-cat="pd" onclick="setFilter('pd')">Power &amp; Dominance</button>
+  <button class="filter-btn" data-cat="dm" onclick="setFilter('dm')">Deception &amp; Manipulation</button>
+  <button class="filter-btn" data-cat="ds" onclick="setFilter('ds')">Defense &amp; Survival</button>
+  <button class="filter-btn" data-cat="ri" onclick="setFilter('ri')">Reputation &amp; Image</button>
+  <button class="filter-btn" data-cat="st" onclick="setFilter('st')">Strategy &amp; Timing</button>
+</div>
+
+<div class="count-bar">
+  <span id="count-label">Showing all 48 laws</span>
+  <span style="opacity:.5">Click any card to open</span>
+</div>
+
+<div class="grid-wrap">
+  <div class="laws-grid" id="grid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-stripe" id="modal-stripe"></div>
+    <button class="modal-close" onclick="closeModal()">✕ Close</button>
+    <div class="modal-head">
+      <div class="modal-num-cat">
+        <span class="modal-num" id="modal-num"></span>
+        <span class="modal-cat-badge" id="modal-badge"></span>
+      </div>
+      <div class="modal-title" id="modal-title"></div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-nav">
+      <button class="modal-nav-btn" id="btn-prev" onclick="navigateModal(-1)">← Previous Law</button>
+      <button class="modal-nav-btn" id="btn-next" onclick="navigateModal(1)">Next Law →</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Notes based on Robert Greene, <em>The 48 Laws of Power</em> (Viking, 1998) · For personal study only
+</footer>
+
+<script>
+const CAT = {
+  pd: { label: 'Power & Dominance',       color: 'var(--cat-pd)' },
+  dm: { label: 'Deception & Manipulation', color: 'var(--cat-dm)' },
+  ds: { label: 'Defense & Survival',       color: 'var(--cat-ds)' },
+  ri: { label: 'Reputation & Image',       color: 'var(--cat-ri)' },
+  st: { label: 'Strategy & Timing',        color: 'var(--cat-st)' },
+};
+
+const LAWS = [
+  {
+    n: 1, cat: 'pd',
+    title: 'Never Outshine the Master',
+    summary: 'Always make those above you feel superior; conceal your talents so they do not threaten.',
+    insight: 'Power flows downward. The master\'s ego is your ceiling until you surpass them legitimately. Envy disguised as praise is the most dangerous trap — never let superiors feel eclipsed.',
+    application: 'Showcase your work as an extension of your superior\'s vision. Credit them publicly. Save your full capability for moments when you\'ve already secured your position.',
+    reversal: 'If your master is weak or on the way out, outshining them accelerates their fall and your rise. Read the political landscape before you dim yourself.',
+    example: 'Nicolas Fouquet hosted a lavish party to impress Louis XIV — and was arrested within weeks. He had made the king feel small in his own kingdom.'
+  },
+  {
+    n: 2, cat: 'ds',
+    title: 'Never Put Too Much Trust in Friends; Learn to Use Enemies',
+    summary: 'Friends are dangerous because they expect favours and breed resentment; former enemies have more to prove.',
+    insight: 'Friendship clouds judgment and creates obligation. A hired enemy knows they must perform — their motivation is survival, not affection. Hire the capable, not the comfortable.',
+    application: 'When choosing deputies, consider those who have opposed you. Keep friends in lower-stakes roles. Never let personal loyalty override competence in critical positions.',
+    reversal: 'In some cultures, loyalty networks are the only power structure. In those contexts, abandoning friends is fatal. Context determines whether to rely on alliance or merit.',
+    example: 'Byzantine emperor Michael III gave power to his friend Basilius. Basilius murdered him and founded a dynasty. The trusted friend is often the greater threat.'
+  },
+  {
+    n: 3, cat: 'dm',
+    title: 'Conceal Your Intentions',
+    summary: 'Keep people off-balance by never revealing the purpose behind your actions.',
+    insight: 'Predictability is vulnerability. When others can anticipate your moves, they can counter them. Obscuring your intent forces them to react rather than prepare.',
+    application: 'Use decoys — pursue a visible goal that masks your real one. Speak openly about plans you\'ve already abandoned. Let curiosity do your work for you.',
+    reversal: 'In relationships requiring deep trust (close partnerships, founding teams), concealment breeds paranoia and destroys collaboration. Selective transparency is the skill.',
+    example: 'Otto von Bismarck consistently disguised his ultimate goal of German unification behind a series of apparently minor diplomatic manoeuvres, each move masking the next.'
+  },
+  {
+    n: 4, cat: 'dm',
+    title: 'Always Say Less Than Necessary',
+    summary: 'The more you say, the more common you appear — powerful people speak sparingly and command attention.',
+    insight: 'Silence creates mystery and projection. When you say little, others fill the void with their own assumptions, often in your favour. Words, once out, cannot be recalled.',
+    application: 'In negotiations, let silence do the work after making your point. In meetings, speak last. Cultivate the habit of pausing before responding — it reads as gravitas.',
+    reversal: 'In creative fields, silence can read as emptiness. Charismatic leadership often requires verbal richness. Know whether your arena rewards brevity or eloquence.',
+    example: 'Louis XIV was famous for a single phrase — "I shall see" — as his response to almost any petition. This ambiguity kept courtiers in perpetual suspense and servitude.'
+  },
+  {
+    n: 5, cat: 'ri',
+    title: 'So Much Depends on Reputation — Guard It with Your Life',
+    summary: 'Reputation is the cornerstone of power; protect yours fiercely and destroy enemies\' before they can move against you.',
+    insight: 'Reputation precedes you into every room. It shapes how your actions are interpreted — the same move reads as brilliant from the powerful and suspicious from the unknown.',
+    application: 'Actively manage your narrative. When attacked, don\'t defend — counterattack on a different dimension. Destroy credibility upstream, before accusations land.',
+    reversal: 'If your reputation is already compromised, sometimes the boldest move is to own the flaw and reframe it as honesty or self-awareness. Weaponise the accusation.',
+    example: 'P.T. Barnum understood that controversy was a form of reputation. He manufactured scandals to stay in the public eye, turning notoriety into currency.'
+  },
+  {
+    n: 6, cat: 'st',
+    title: 'Court Attention at All Costs',
+    summary: 'Everything is judged by its appearance; be a magnet for attention or be forgotten.',
+    insight: 'Obscurity is death in competitive environments. Even negative attention is more convertible than invisibility. The goal is to be talked about — shape the talking later.',
+    application: 'Make your entrances and exits memorable. Create scarcity around your presence. Attach your name to bold gestures, even small ones, that get repeated in conversation.',
+    reversal: 'In some hierarchies (military, bureaucratic), conspicuousness makes you a target. Read whether your context rewards visibility or quiet accumulation of influence.',
+    example: 'Oscar Wilde built his career as much on his persona as his writing — his wit, dress, and provocations made him unmissable, turning a playwright into a cultural force.'
+  },
+  {
+    n: 7, cat: 'st',
+    title: 'Get Others to Do the Work for You, but Always Take the Credit',
+    summary: 'Use others\' skill and labour to your advantage; your efficiency and position grow when you direct rather than do.',
+    insight: 'Power accrues to those who orchestrate, not just those who execute. Credit is the currency of advancement — allow it to accumulate to you while generously distributing acknowledgment of lesser contributions.',
+    application: 'Build a team where excellence flows through you. Position yourself as the curator and director of talent. Acknowledge contributors in ways that still centre your role as the enabler.',
+    reversal: 'In flat, collaborative cultures (tech startups, academic groups), taking sole credit destroys the trust that makes the team function. Calibrate to your context.',
+    example: 'Thomas Edison ran a laboratory of brilliant inventors but ensured the patents, fame, and commercial credit accrued to him — his name became synonymous with invention itself.'
+  },
+  {
+    n: 8, cat: 'ds',
+    title: 'Make Other People Come to You — Use Bait if Necessary',
+    summary: 'Force others to act on your terms by making them come to you; this gives you positional advantage.',
+    insight: 'The person who moves first concedes something — information, position, eagerness. Drawing opponents to you on your ground shifts power before a word is spoken.',
+    application: 'Create something desirable enough that others seek you out. In negotiations, be the one who waits. Manufacture scarcity of your attention and time.',
+    reversal: 'When the opportunity is time-sensitive and your opponent has equal patience, waiting loses. Act when the cost of delay exceeds the cost of concession.',
+    example: 'Napoleon lured enemies into terrain of his choosing — he appeared to retreat to draw opponents forward, then struck from positions he had already selected.'
+  },
+  {
+    n: 9, cat: 'st',
+    title: 'Win Through Your Actions, Never Through Argument',
+    summary: 'Demonstrate rather than debate; victory by argument is hollow and breeds resentment.',
+    insight: 'Arguments engage the ego of the opponent — they dig in. Actions bypass the ego and change the reality others must respond to. Done is more persuasive than argued.',
+    application: 'When you need to change someone\'s mind, don\'t debate — demonstrate. Produce the result they said was impossible. Let outcomes do the convincing.',
+    reversal: 'In deliberative institutions (law, academia, policy), argument is the legitimate currency and must be mastered. Know when the arena requires rhetoric, not results.',
+    example: 'Michelangelo, told his Pietà couldn\'t be his work because he was too young, carved his name into the Virgin\'s sash — the only time he ever signed a sculpture.'
+  },
+  {
+    n: 10, cat: 'dm',
+    title: 'Infection: Avoid the Unhappy and Unlucky',
+    summary: 'Misery and bad fortune are contagious; protect yourself by keeping distance from the chronically unfortunate.',
+    insight: 'Emotions and reputations transfer through association. Proximity to failure, negativity, or chaos reshapes how others perceive and treat you — regardless of your own actions.',
+    application: 'Audit your close associations ruthlessly. Exit relationships that consistently drain energy without offering growth or reciprocity. Associate visibly with the ascending.',
+    reversal: 'This is the coldest law — applied rigidly, it produces sociopathic isolation. The genuine value is in managing your energy, not abandoning people in crisis.',
+    example: 'The court of Versailles operated as a social ecosystem where association with a disgraced courtier was itself a form of contagion — one fall could trigger a cascade.'
+  },
+  {
+    n: 11, cat: 'dm',
+    title: 'Learn to Keep People Dependent on You',
+    summary: 'Make others need you for their prosperity or security; the more indispensable you are, the more power you hold.',
+    insight: 'Independence is the enemy of leverage. The ideal position is one where your absence creates a crisis. This requires either rare skill, unique information, or irreplaceable relationships.',
+    application: 'Specialise in something that crosses domains — skills that only you combine. Own key relationships or information channels that others must route through you.',
+    reversal: 'Dependence breeds resentment. The person who most needs you will also most want to be free of that need. Build in enough generosity to make the dependence feel like partnership.',
+    example: 'Bismarck made himself so central to the web of European diplomacy that his dismissal by Kaiser Wilhelm II was widely predicted to destabilise the continent — and it did.'
+  },
+  {
+    n: 12, cat: 'dm',
+    title: 'Use Selective Honesty and Generosity to Disarm Your Victim',
+    summary: 'A single honest or generous act can cover a multitude of deceptions — one gift disarms suspicion.',
+    insight: 'Trust is built through perceived vulnerability. Revealing something true — even a minor truth — signals to others that you have no agenda, lowering their defences.',
+    application: 'Front-load honesty in new relationships or negotiations. A candid admission of a minor weakness reads as integrity and makes subsequent positioning harder to question.',
+    reversal: 'Pattern-recognition catches this. If honesty is always followed by an ask, the disarming effect evaporates. Genuine integrity occasionally requires honesty at real cost to yourself.',
+    example: 'Con artist Joseph "Yellow Kid" Weil always opened with a demonstration of real value — a genuine tip, a real favour — before the setup that exploited the trust he\'d built.'
+  },
+  {
+    n: 13, cat: 'dm',
+    title: 'When Asking for Help, Appeal to Self-Interest',
+    summary: 'Never appeal to mercy or gratitude — speak only to what benefits the person you are asking.',
+    insight: 'People do not act on your needs; they act on theirs. Framing your request in terms of the other person\'s gains, fears, or status removes the friction of apparent sacrifice.',
+    application: 'Before any request, map what the other person gains from compliance. Lead with that, not with your need. Make your ask sound like an opportunity they\'d be foolish to miss.',
+    reversal: 'With people who are genuinely altruistic or who derive identity from helping, appeals to their generosity can outperform appeals to self-interest. Read the person.',
+    example: 'When scientists needed funding from wealthy patrons during the Renaissance, the savviest framed discoveries as tools of prestige and military advantage — not as knowledge for its own sake.'
+  },
+  {
+    n: 14, cat: 'dm',
+    title: 'Pose as a Friend, Work as a Spy',
+    summary: 'Learn to use social encounters to gather intelligence; appear friendly while gathering information that grants you advantage.',
+    insight: 'Information is the most durable form of power. What others reveal in relaxed social settings is more accurate than anything they\'d say in formal contexts.',
+    application: 'Develop the habit of asking open questions and listening far more than you speak. People who feel heard reveal far more than they intend. Never seem to be gathering — seem interested.',
+    reversal: 'Instrumentalising relationships hollows them out and, when discovered, destroys trust permanently. The most sustainable version is simply being genuinely curious about people.',
+    example: 'Cardinal Richelieu maintained a network of social informants across French society — people who thought they were simply making conversation at dinners were feeding his intelligence operation.'
+  },
+  {
+    n: 15, cat: 'ds',
+    title: 'Crush Your Enemy Totally',
+    summary: 'A half-defeated enemy recovers and returns; only total victory eliminates the threat permanently.',
+    insight: 'Mercy in conflict is often cowardice rationalised as virtue. A wounded, humiliated opponent has more motivation to return than before — their grievance is now personal.',
+    application: 'When you must act against someone, act decisively and completely. Don\'t leave them with resources, allies, or public grievance that can be mobilised against you later.',
+    reversal: 'Total destruction of an opponent often creates martyrs and rallies their supporters. Sometimes a defeated enemy offered an honourable exit is more neutralised than one left smouldering.',
+    example: 'The Treaty of Versailles half-defeated Germany — enough to humiliate, not enough to destroy. The resulting resentment was a direct precondition for the next war.'
+  },
+  {
+    n: 16, cat: 'ri',
+    title: 'Use Absence to Increase Respect and Honour',
+    summary: 'Too much presence cheapens your value; withdraw strategically to make others appreciate and seek you.',
+    insight: 'Familiarity creates contempt; scarcity creates desire. The person who is always available loses the mystique that makes them worth pursuing.',
+    application: 'Become less accessible as your value increases. Create waiting time. Don\'t respond immediately to everything. Let the gap between your appearances generate anticipation.',
+    reversal: 'In early career or new relationships, absence before establishing value just looks like absence. You must first build presence before scarcity can amplify it.',
+    example: 'Greta Garbo\'s early retirement from Hollywood in 1941 — at the height of her fame — made her more mythologised in absence than she had been in constant presence.'
+  },
+  {
+    n: 17, cat: 'st',
+    title: 'Keep Others in Suspended Terror: Cultivate an Air of Unpredictability',
+    summary: 'Unpredictability keeps others off-balance; they cannot prepare against what they cannot predict.',
+    insight: 'Patterns invite counter-strategies. When you become predictable, opponents can prepare, anticipate, and neutralise you. Random variation in behaviour keeps the environment uncertain for everyone but you.',
+    application: 'Occasionally do the unexpected — the generous act when meanness was expected, or the hard line when concession was anticipated. Never let a pattern fully solidify.',
+    reversal: 'In organisations requiring trust and coordination (teams, partnerships), unpredictability is destructive rather than powerful. Reserve it for adversarial contexts.',
+    example: 'Bobby Fischer\'s erratic behaviour in negotiations and matches was not merely temperament — it functionally destabilised opponents who could never predict what he\'d do next.'
+  },
+  {
+    n: 18, cat: 'ds',
+    title: 'Do Not Build Fortresses to Protect Yourself — Isolation is Dangerous',
+    summary: 'Withdrawal cuts you off from intelligence and allies; safety comes from circulation, not walls.',
+    insight: 'The fortress mentality is a trap. Isolation degrades your information, erodes your alliances, and signals weakness. Power is networked, not defended.',
+    application: 'When under attack, increase your social circulation, not decrease it. Be visible. Maintain relationships across factions. Information from diverse sources is your best protection.',
+    reversal: 'Some forms of isolation — temporary retreat for strategic recalibration — are valuable. The key is that the withdrawal is chosen and time-limited, not a permanent bunker.',
+    example: 'Louis XIV deliberately centralised the French nobility at Versailles — he knew that a court kept in his presence could not be conspiring in their provinces.'
+  },
+  {
+    n: 19, cat: 'ds',
+    title: 'Know Who You\'re Dealing With — Do Not Offend the Wrong Person',
+    summary: 'People react very differently to the same treatment; read your mark carefully before acting.',
+    insight: 'The same move that charms one person enrages another. The failure to correctly categorise people — their vanity, their capacity for vengeance, their actual power — is a recurring cause of catastrophic miscalculation.',
+    application: 'Before making any significant move against or toward someone, invest time in reading their history: how have they responded to slights, losses, opportunities in the past? Pattern-match.',
+    reversal: 'Over-caution and excessive categorisation can produce paralysis. Not every interaction requires deep profiling — reserve your reconnaissance for high-stakes encounters.',
+    example: 'The Roman general Flamininus made the error of pushing Hannibal into a corner after his defeat. Rather than a broken man, he found a still-formidable enemy with nothing to lose.'
+  },
+  {
+    n: 20, cat: 'dm',
+    title: 'Do Not Commit to Anyone',
+    summary: 'Maintain independence by never fully committing to any side; let others vie for your loyalty.',
+    insight: 'The moment you fully commit, your value to all parties collapses — you\'ve become predictable and obligated. Holding yourself slightly apart keeps you in demand.',
+    application: 'In factional environments, be genuinely useful to multiple sides without becoming owned by any. Make each side believe they have a better chance of winning your full support.',
+    reversal: 'In contexts where commitment is the currency (founding teams, long-term partnerships, close friendship), perpetual non-commitment is experienced as unreliability and destroys trust.',
+    example: 'The city-states of Renaissance Italy survived by playing larger powers against each other — Venice in particular mastered the art of perpetual diplomatic ambiguity.'
+  },
+  {
+    n: 21, cat: 'dm',
+    title: 'Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark',
+    summary: 'No one likes feeling outsmarted; appear less capable than you are to lower opponents\' guards.',
+    insight: 'Intelligence displayed too openly triggers competitive and defensive responses. Apparent naivety invites people to underestimate and over-explain — both of which are intelligence-gathering opportunities.',
+    application: 'Ask questions to which you know the answer. Appear uncertain in areas of your strength. Let others feel they are educating you — they reveal more when they believe they\'re in control.',
+    reversal: 'In contexts where you\'re hired for expertise (consulting, surgery, law), apparent incompetence is disqualifying. Know which situations require demonstrated mastery.',
+    example: 'Columbo\'s entire detective method — confusion, apparent forgetfulness, one-more-thing questions — was a systematic apparatus for making suspects comfortable enough to reveal themselves.'
+  },
+  {
+    n: 22, cat: 'st',
+    title: 'Use the Surrender Tactic: Transform Weakness into Power',
+    summary: 'When weaker, surrender rather than fight — yielding buys time, disarms aggression, and sets up a future counter.',
+    insight: 'Resistance from weakness invites destruction. Apparent capitulation deflates the victor\'s aggression, removes the immediate threat, and creates space to rebuild. Time is the great equaliser.',
+    application: 'When outmatched, don\'t escalate — retreat visibly and graciously. Reframe surrender as wisdom. Use the breathing room to rebuild position before re-engaging.',
+    reversal: 'Habitual surrender trains others to escalate against you. Strategic surrender must be followed by genuine restrengthening and a clear moment of re-engagement.',
+    example: 'Bertolt Brecht, summoned before the House Un-American Activities Committee in 1947, performed a masterful strategic retreat — appearing cooperative enough to survive while undermining the process.'
+  },
+  {
+    n: 23, cat: 'st',
+    title: 'Concentrate Your Forces',
+    summary: 'Intense focus on a single target or source of power yields more than dispersed effort across many.',
+    insight: 'Power diluted across too many fronts weakens everywhere. Concentration — of resources, attention, relationships — produces the critical mass that diluted effort never can.',
+    application: 'Identify your single most leveraged area and over-invest there. Resist the temptation to hedge by spreading effort. Consolidate before expanding.',
+    reversal: 'Extreme concentration creates single points of failure. Once dominant in one area, diversification protects against the reversal that a single-threaded strategy always risks.',
+    example: 'The Rothschild banking dynasty initially concentrated all its resources and intelligence in a single market niche before expanding — depth before breadth was the foundation of their empire.'
+  },
+  {
+    n: 24, cat: 'ri',
+    title: 'Play the Perfect Courtier',
+    summary: 'Master the arts of indirection, flattery, and social grace; these are the tools of those who operate within power structures.',
+    insight: 'Every organisation has a court — a social ecosystem with its own rules of advancement. Those who understand and navigate those rules quietly gain more than those who resent them.',
+    application: 'Study the unwritten rules of your organisation. Identify who the real decision-makers are (often not the nominal ones). Build relationships with gatekeepers. Flatter strategically, not sycophantically.',
+    reversal: 'Pure courtier behaviour — all flattery and positioning — is hollow and eventually transparent. The most effective courtiers combine social grace with genuine competence.',
+    example: 'Baldassare Castiglione\'s Book of the Courtier codified these arts in the Renaissance — a manual for navigating court politics through charm, discretion, and apparent effortlessness.'
+  },
+  {
+    n: 25, cat: 'ri',
+    title: 'Re-Create Yourself',
+    summary: 'Do not accept the role society assigns you; forge your own identity and keep reinventing it.',
+    insight: 'Identity is a performance. Those who allow others to define them are trapped by others\' expectations. Deliberate self-reinvention resets what people expect and project onto you.',
+    application: 'Periodically audit how others perceive you and whether that serves you. Engineer a transition — in style, focus, or context — that rewrites the narrative. Do it before stagnation sets in.',
+    reversal: 'Constant reinvention without a consistent core produces the reputation of instability. Each reinvention should build on a durable underlying identity, not replace it entirely.',
+    example: 'Madonna\'s career was defined by serial reinvention — each era a new persona that reset public expectations and extended her relevance decades beyond her contemporaries.'
+  },
+  {
+    n: 26, cat: 'pd',
+    title: 'Keep Your Hands Clean',
+    summary: 'Conceal your involvement in dirty or unpleasant acts by using others as agents and scapegoats.',
+    insight: 'The powerful rarely do their own dirty work — not from cowardice, but from strategic wisdom. Visible involvement in unpleasant acts is reputationally costly. Deniability is a structural asset.',
+    application: 'When unavoidably unpleasant decisions must be made, have them enacted through others. Be visibly associated with the goals, not the methods. Ensure clean separation.',
+    reversal: 'This only works when the scapegoat accepts the role. If they don\'t, you\'ve created a witness with every incentive to expose you. Choose your agents carefully.',
+    example: 'Catherine de Medici operated almost entirely through intermediaries — her power was real and extensive, but her hands appeared perpetually clean throughout the Wars of Religion.'
+  },
+  {
+    n: 27, cat: 'pd',
+    title: 'Play on People\'s Need to Believe to Create a Cult-like Following',
+    summary: 'People desperately want to believe in something greater; give them that and they will follow you.',
+    insight: 'Rationality is overrated as a driver of human behaviour. Meaning, belonging, and a sense of special mission are more motivating than incentives. The leader who provides these becomes indispensable.',
+    application: 'Build a shared identity around your project or organisation. Create rituals, language, and a sense of insider knowledge. Make followers feel they\'ve discovered something the outside world doesn\'t yet understand.',
+    reversal: 'Cult dynamics, once established, are extremely difficult to dismantle even when you want to. Building organisations on belief rather than reason makes rational course-correction nearly impossible.',
+    example: 'Dr. John Harvey Kellogg built a health empire at Battle Creek Sanitarium by wrapping mundane dietary regimens in the language of moral uplift and scientific revelation.'
+  },
+  {
+    n: 28, cat: 'st',
+    title: 'Enter Action with Boldness',
+    summary: 'Timidity is dangerous; boldness creates its own momentum and forces others to react.',
+    insight: 'Hesitation communicates doubt, and doubt is contagious. Bold action, even when not fully calculated, forces a tempo that advantages the mover — others must respond to your reality.',
+    application: 'In ambiguous situations, act first. Make the decision others are waiting on. Set the terms of engagement through the audacity of your first move.',
+    reversal: 'Boldness without preparation is recklessness. The most effective boldness is backed by genuine capability — it reads as bold to others because they don\'t see the preparation.',
+    example: 'Hernán Cortés, upon landing in Mexico, burned his ships — making retreat impossible. The boldness of the gesture unified his men through manufactured necessity.'
+  },
+  {
+    n: 29, cat: 'st',
+    title: 'Plan All the Way to the End',
+    summary: 'Think through every consequence before acting; the ending is everything.',
+    insight: 'Most failures are failures of anticipation. People optimise for the first move and neglect the endgame. Thinking backward from the desired outcome reveals the true path and its real obstacles.',
+    application: 'Before any significant initiative, map the endgame first: what does success look like, who is affected, what are the second and third-order reactions? Work backward from there.',
+    reversal: 'Over-planning in rapidly changing environments creates rigidity. Some situations reward iteration and adaptation over comprehensive pre-planning. Know the difference.',
+    example: 'Bismarck planned the Franco-Prussian War years before it began — engineering the conditions, the timing, and the international isolation of France before a shot was fired.'
+  },
+  {
+    n: 30, cat: 'pd',
+    title: 'Make Your Accomplishments Seem Effortless',
+    summary: 'Conceal the work behind your results; effort revealed diminishes the impression of natural mastery.',
+    insight: 'The appearance of effortlessness signals innate superiority — which is more threatening to rivals and more attractive to followers than visible hard work. Sprezzatura is the art of concealed effort.',
+    application: 'Never explain how hard something was. Don\'t show your practice, only your performance. Let the difficulty be inferred from the result, not narrated from the process.',
+    reversal: 'In cultures that value hustle and transparency (many tech environments, fitness communities), visible effort is bonding and motivating. Read whether your audience rewards the process or the product.',
+    example: 'Fred Astaire insisted on reshooting scenes until they looked perfectly casual — and then had the rehearsal footage destroyed. The effortlessness was the product of obsessive work carefully hidden.'
+  },
+  {
+    n: 31, cat: 'pd',
+    title: 'Control the Options: Get Others to Play with the Cards You Deal',
+    summary: 'Give people the illusion of choice while controlling all available alternatives.',
+    insight: 'Framing determines outcome. When you control the options, you control the decision — even when others believe they are choosing freely. The most effective control is invisible.',
+    application: 'In any negotiation, define the alternatives. Present your preferred option alongside worse alternatives rather than alongside better ones. Make the path of least resistance lead where you want.',
+    reversal: 'Sophisticated counterparts recognise constrained choices and reject the entire frame. The most resilient version is offering genuinely good options — where any choice benefits you.',
+    example: 'Henry Kissinger frequently presented options to presidents in triads: an extreme option, a clearly inadequate option, and the "reasonable middle" — which was his actual recommendation all along.'
+  },
+  {
+    n: 32, cat: 'dm',
+    title: 'Play to People\'s Fantasies',
+    summary: 'The truth is often dull and disappointing; those who offer fantasy and romance are more seductive than those who offer reality.',
+    insight: 'People do not want the complicated truth — they want confirmation of their preferred narrative. The person who supplies a compelling story beats the person who supplies accurate data, again and again.',
+    application: 'Understand what your audience wants to believe, and speak to that belief. Don\'t promise what is — promise what could be. Make the aspiration vivid and the path feel attainable.',
+    reversal: 'Fantasy-based relationships collapse on contact with reality. Sustainable influence requires that the fantasy be eventually deliverable, or at least replaceable with a new fantasy.',
+    example: 'Dr. Faustus figures appear repeatedly in history — charismatic figures who offered transformation and liberation, exploiting the gap between people\'s dreams and their circumstances.'
+  },
+  {
+    n: 33, cat: 'ds',
+    title: 'Discover Each Man\'s Thumbscrew',
+    summary: 'Everyone has a weakness — an insecurity, a need, a pressure point; find it and use it.',
+    insight: 'No one is without leverage points. The key is patient observation: watch what people are defensive about, what they boast about, what they avoid. These are the maps to their pressure points.',
+    application: 'In any significant relationship, spend time learning what the other person most needs (recognition, safety, belonging, control) and what they most fear. This is information, not necessarily a weapon.',
+    reversal: 'Using someone\'s vulnerabilities against them is irreversible — they will never forget it, and will move against you when circumstances allow. Often the thumbscrew is better held in reserve than deployed.',
+    example: 'Talleyrand identified Napoleon\'s need for validation and historical legacy early — and used that understanding to remain indispensable through empire, defeat, and restoration alike.'
+  },
+  {
+    n: 34, cat: 'ri',
+    title: 'Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One',
+    summary: 'How you carry yourself determines how others treat you; project confidence and dignity regardless of your current position.',
+    insight: 'Treatment follows expectation. People read signals of status and respond to them — even in the absence of formal authority. Self-possession is a kind of social claiming of territory.',
+    application: 'Set your own prices (literally and figuratively). Don\'t apologise for your presence. Ask for what you want directly. Treat your time as valuable before others treat it that way.',
+    reversal: 'Grandiosity without backing is quickly exposed. The law works when the self-presentation is backed by genuine competence or resources — otherwise it reads as delusion.',
+    example: 'Christopher Columbus secured funding from the Spanish crown partly through the sheer confidence of his self-presentation — he negotiated terms as though his success were already guaranteed.'
+  },
+  {
+    n: 35, cat: 'st',
+    title: 'Master the Art of Timing',
+    summary: 'Never seem in a hurry; patience creates the moment, and striking at the right moment multiplies force.',
+    insight: 'Timing is force multiplication. The same action at the wrong moment is wasted or counterproductive; at the right moment, it is decisive. Most impatience is ego — the belief that your timeline should be everyone\'s.',
+    application: 'Develop the habit of waiting for the right conditions before acting, even when action is possible earlier. Watch for the moment when the environment shifts in your favour.',
+    reversal: 'Waiting too long for perfect conditions means never acting. There is a window for most opportunities — waiting beyond it is as costly as acting before it.',
+    example: 'Fabius Maximus, the "Dictator" appointed to deal with Hannibal, refused direct engagement for years — using time, terrain, and attrition rather than battle. Rome vilified him and ultimately vindicated him.'
+  },
+  {
+    n: 36, cat: 'dm',
+    title: 'Disdain Things You Cannot Have: Ignoring Them is the Best Revenge',
+    summary: 'Acknowledging small problems and slights gives them power; the powerful move past what they cannot change.',
+    insight: 'Anger signals that someone has power over you. Disdain signals the opposite — that the thing in question is beneath your notice. Choosing what to react to is itself an exercise of power.',
+    application: 'When you cannot redress a wrong immediately, refuse to react visibly. Channel energy into what you can control. Return your attention only when you have genuine leverage.',
+    reversal: 'Strategic disdain can be misread as weakness or ignorance of the threat. Sometimes visible, controlled acknowledgment — not anger, but recognition — is a stronger signal than apparent indifference.',
+    example: 'After being passed over for a promotion he deserved, Ulysses S. Grant quietly left the company, rebuilt his career in a different context, and never mentioned the slight. History settled it for him.'
+  },
+  {
+    n: 37, cat: 'pd',
+    title: 'Create Compelling Spectacles',
+    summary: 'Striking imagery and grand symbolic gestures speak louder than words; use them to overwhelm and impress.',
+    insight: 'The emotional brain processes images faster and more durably than arguments. Spectacle creates memory and association — it bypasses rational resistance and lodges directly in feeling.',
+    application: 'Stage significant moments deliberately. Control the environment, the aesthetics, the symbolism of important announcements or transitions. Make people feel they witnessed something historic.',
+    reversal: 'Spectacle without substance is quickly discredited and invites backlash proportional to the original impression. Ensure the spectacle is backed by something real.',
+    example: 'Louis XIV\'s court at Versailles was an unbroken spectacle — the architecture, the rituals, the choreography of daily life were all designed to produce a continuous impression of divine power.'
+  },
+  {
+    n: 38, cat: 'ds',
+    title: 'Think as You Like but Behave Like Others',
+    summary: 'Flaunting unconventional beliefs invites isolation; blend in publicly while preserving your thinking privately.',
+    insight: 'Nonconformity is expensive when you need allies and resources. The innovator who signals too much deviance loses access before they can demonstrate their value. Social conformity is often strategic patience.',
+    application: 'Reserve your most unconventional thinking for private contexts and trusted relationships. Adopt the language and surface behaviours of your environment while building the position from which to act differently.',
+    reversal: 'Some contexts (creative industries, entrepreneurship) reward and even require visible nonconformity. Read whether your arena punishes or rewards difference before deciding how much to conceal.',
+    example: 'Galileo privately maintained his heliocentric views under the Inquisition\'s pressure, publicly recanting, and continued his scientific work through private correspondence with trusted contemporaries.'
+  },
+  {
+    n: 39, cat: 'st',
+    title: 'Stir Up Waters to Catch Fish',
+    summary: 'Anger and agitation cloud the judgment of your enemies; keep them stirred up while you remain calm.',
+    insight: 'Emotional agitation degrades decision-making. If you can provoke your opponent into reacting emotionally while maintaining your own composure, you have a decisive cognitive advantage.',
+    application: 'In conflicts, remain visibly calm while using indirect means to agitate: ambiguity, unpredictability, apparent indifference to things they care about. Let their reaction reveal their priorities.',
+    reversal: 'Deliberate provocation escalates unpredictably. An agitated opponent may do something irrational that hurts both sides. Use this law only when you can absorb the collateral.',
+    example: 'Napoleon used apparent disarray and feigned retreats to draw opponents into emotional pursuit, then turned and destroyed them at a time and place of his choosing.'
+  },
+  {
+    n: 40, cat: 'pd',
+    title: 'Despise the Free Lunch',
+    summary: 'What is given freely carries hidden obligations; pay your own way to maintain independence and power.',
+    insight: 'Nothing is truly free — gifts create obligations, generosity creates expectations, and anything received without cost can be revoked. Independence is purchased, not gifted.',
+    application: 'Be wary of unusually favourable terms, excessive generosity, or gifts that arrive without clear motivation. The cost is rarely zero; it is deferred. Pay what things are worth.',
+    reversal: 'Paranoid refusal of all gifts is as dysfunctional as naïve acceptance. The skill is correctly pricing what is offered and understanding what obligation is implied.',
+    example: 'The Medicis understood that free patronage created dependant artists — and that those artists\' loyalty and output were the return on the apparent generosity.'
+  },
+  {
+    n: 41, cat: 'ds',
+    title: 'Avoid Stepping into a Great Man\'s Shoes',
+    summary: 'What comes first always seems better; establish your own identity rather than following a legend.',
+    insight: 'Successors are always measured against their predecessors — and usually found wanting. The only solution is to differentiate so completely that comparison becomes irrelevant.',
+    application: 'If you inherit a role, a brand, or a reputation, move quickly to reframe it as the beginning of something new, not the continuation of something old. Break with visible aspects of the predecessor.',
+    reversal: 'Some predecessors are so disastrous that continuity is itself the differentiation. Read whether the predecessor is revered or resented — your strategy must begin there.',
+    example: 'Louis XV\'s long reign was spent in the shadow of the Sun King — a comparison he could never win, partly because he never seriously tried to establish an independent identity.'
+  },
+  {
+    n: 42, cat: 'pd',
+    title: 'Strike the Shepherd and the Sheep Will Scatter',
+    summary: 'Trouble in a group often traces to a single source; neutralise that individual and the group dissolves.',
+    insight: 'Networks and organisations are rarely truly collective — they have structural centres without which the whole loses coherence. Identifying and neutralising that centre is more efficient than engaging the periphery.',
+    application: 'When facing opposition, map the leadership structure. Who is the irreplaceable node? Focus resources on that individual — through marginalisation, co-optation, or direct removal.',
+    reversal: 'Visible, aggressive removal of a leader can create martyrdom effects that energise the remainder. Sometimes co-optation — turning the shepherd — is more efficient than elimination.',
+    example: 'The Roman strategy against the Gallic tribes was consistently to find and neutralise the unifying chieftain — without Vercingetorix, the Gallic coalition rapidly fragmented.'
+  },
+  {
+    n: 43, cat: 'dm',
+    title: 'Work on the Hearts and Minds of Others',
+    summary: 'Coercion breeds resentment and resistance; seduction of the emotions and imagination is more durable.',
+    insight: 'Force creates compliance, not allegiance. People who follow because they want to are exponentially more valuable than people who follow because they must. Win the heart and the body follows.',
+    application: 'Invest in the emotional dimension of relationships and organisations: recognition, meaning, a compelling narrative about what you are doing together. These create discretionary effort that coercion cannot.',
+    reversal: 'Emotional seduction is slow and requires genuine investment. In time-critical situations requiring immediate compliance, the soft approach is a luxury. Have both available.',
+    example: 'Abraham Lincoln\'s genius was understanding that the North could not simply defeat the South militarily — it had to be a war of meaning, which is why the Emancipation Proclamation was as much a communications strategy as a policy.'
+  },
+  {
+    n: 44, cat: 'dm',
+    title: 'Disarm and Infuriate with the Mirror Effect',
+    summary: 'Mirror your opponents\' behaviour exactly — it unsettles them and exposes the futility of their strategy.',
+    insight: 'People are disturbed by accurate reflections of their own behaviour. Mirroring neutralises moral high ground, confuses their expectations, and gives you a position that is difficult to attack without self-indictment.',
+    application: 'Match what is done to you — return coldness for coldness, generosity for generosity, aggression for aggression. Make the pattern visible. Let the other person experience what they have produced.',
+    reversal: 'Mirroring bad behaviour can escalate destructively. It works best as a temporary positioning tool, not a permanent strategy. Exit the mirror when you\'ve established your point.',
+    example: 'Ivan the Terrible used psychological mirroring against rivals at court — adopting their own methods against them in ways that forced them to either abandon those methods or appear hypocritical.'
+  },
+  {
+    n: 45, cat: 'st',
+    title: 'Preach the Need for Change, but Never Reform Too Much at Once',
+    summary: 'People understand the need for change intellectually but fear it emotionally; move gradually to avoid triggering resistance.',
+    insight: 'Revolutionary change activates threat responses even in people who agree with the goal. Gradual change allows people to adapt and rationalise each step, making the cumulative transformation feel natural.',
+    application: 'When driving significant change, sequence your initiatives. Show early wins that build trust. Frame each step in continuity with what came before. Make the revolution look like evolution.',
+    reversal: 'Crisis contexts sometimes require rapid, dramatic change — the shock of the new can override resistance when the status quo has already collapsed. Speed and scale of change should match the urgency of the situation.',
+    example: 'Peter the Great modernised Russia radically — but did so through rapid decrees from a position of absolute power that could absorb the resistance his reforms generated. Few have that advantage.'
+  },
+  {
+    n: 46, cat: 'ds',
+    title: 'Never Appear Too Perfect',
+    summary: 'Appearing without flaw invites envy; occasionally reveal harmless vices to seem more human.',
+    insight: 'Perfection is alienating and threatening — it suggests others must measure themselves against an impossible standard. Strategic imperfection makes you approachable and disarms the envy that is otherwise directed at you.',
+    application: 'Reveal a minor, charming weakness alongside your strengths. Self-deprecating humour signals confidence. Admit small errors to make large capabilities less threatening.',
+    reversal: 'Performed imperfection is quickly distinguished from genuine humility. The imperfection you reveal must be believable and actually minor — not a hidden major vulnerability.',
+    example: 'Benjamin Franklin deliberately revealed his errors and sought others\' advice on small matters — this calculated approachability made his formidable capabilities far less threatening to his contemporaries.'
+  },
+  {
+    n: 47, cat: 'st',
+    title: 'Do Not Go Past the Mark You Aimed For; In Victory, Learn When to Stop',
+    summary: 'The moment of victory is the moment of greatest danger; overreach squanders what has been won.',
+    insight: 'Success distorts judgment. The intoxication of victory produces overconfidence and expanded ambition precisely when consolidation is what the situation requires. The most common form of self-destruction is success without restraint.',
+    application: 'Define your objective in advance and commit to stopping when it is achieved. Build in a circuit-breaker that triggers when you\'ve won. Resist the temptation to expand the aim as momentum builds.',
+    reversal: 'Some opportunities exist only briefly and must be fully exploited before they close. The skill is distinguishing the moment that rewards consolidation from the moment that rewards pursuit.',
+    example: 'Napoleon\'s invasion of Russia exemplifies the law\'s violation — having achieved dominance over Europe, he overreached into a campaign that required him to stop where he had no ability to stop.'
+  },
+  {
+    n: 48, cat: 'pd',
+    title: 'Assume Formlessness',
+    summary: 'Accept nothing as fixed; remain fluid and adaptable so that no one can get a hold on you.',
+    insight: 'The rigid breaks; the fluid bends and survives. Any fixed form becomes a target once it is identified. Formlessness is the final lesson: power\'s ultimate expression is the capacity to become whatever the situation requires.',
+    application: 'Resist the temptation to crystallise into an identity, a method, or an ideology. Keep your capabilities broad and your commitments loose enough to adapt. Let others predict you at their peril.',
+    reversal: 'Complete formlessness is paralysis — some structure is necessary for action. The practice is maintaining fluidity at the edges while retaining a stable core that provides direction.',
+    example: 'Water is Greene\'s image here — it takes the shape of any container but cannot be grasped. The most enduring powers (the Catholic Church, great trading empires) were those that could adapt their form across centuries.'
+  }
+];
+
+// ── BUILD GRID ──
+const grid = document.getElementById('grid');
+LAWS.forEach((law, i) => {
+  const card = document.createElement('div');
+  card.className = 'law-card';
+  card.dataset.cat = law.cat;
+  card.dataset.index = i;
+  card.onclick = () => openModal(i);
+  card.innerHTML = `
+    <div class="card-num">${law.n}</div>
+    <div class="card-cat-tag">${CAT[law.cat].label}</div>
+    <div class="card-title">Law ${law.n}. ${law.title}</div>
+    <div class="card-summary">${law.summary}</div>
+  `;
+  grid.appendChild(card);
+});
+
+// ── FILTER ──
+let currentFilter = 'all';
+function setFilter(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.filter-btn[data-cat="${cat}"]`).classList.add('active');
+
+  const cards = document.querySelectorAll('.law-card');
+  let visible = 0;
+  cards.forEach(c => {
+    const show = cat === 'all' || c.dataset.cat === cat;
+    c.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  const label = cat === 'all'
+    ? 'Showing all 48 laws'
+    : `Showing ${visible} laws — ${CAT[cat].label}`;
+  document.getElementById('count-label').textContent = label;
+}
+
+// ── MODAL ──
+let currentIndex = 0;
+
+function openModal(index) {
+  currentIndex = index;
+  renderModal();
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderModal() {
+  const law = LAWS[currentIndex];
+  const cat = CAT[law.cat];
+
+  document.getElementById('modal-stripe').style.background = cat.color;
+  document.getElementById('modal-num').textContent = law.n;
+
+  const badge = document.getElementById('modal-badge');
+  badge.textContent = cat.label;
+  badge.style.background = cat.color;
+
+  document.getElementById('modal-title').textContent = `Law ${law.n}. ${law.title}`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <span class="section-label">Summary</span>
+    <div class="modal-summary">${law.summary}</div>
+
+    <span class="section-label">Key Insight</span>
+    <div class="modal-text">${law.insight}</div>
+
+    <span class="section-label">Application</span>
+    <div class="modal-callout">${law.application}</div>
+
+    <span class="section-label">Reversal</span>
+    <div class="modal-reversal">${law.reversal}</div>
+
+    <span class="section-label">Historical Example</span>
+    <div class="modal-text" style="font-style:italic;color:var(--muted)">${law.example}</div>
+  `;
+
+  const prevLaw = currentIndex > 0 ? LAWS[currentIndex - 1] : null;
+  const nextLaw = currentIndex < LAWS.length - 1 ? LAWS[currentIndex + 1] : null;
+
+  const prevBtn = document.getElementById('btn-prev');
+  const nextBtn = document.getElementById('btn-next');
+  prevBtn.textContent = prevLaw ? `← Law ${prevLaw.n}` : '';
+  prevBtn.style.visibility = prevLaw ? 'visible' : 'hidden';
+  nextBtn.textContent = nextLaw ? `Law ${nextLaw.n} →` : '';
+  nextBtn.style.visibility = nextLaw ? 'visible' : 'hidden';
+
+  // scroll modal to top
+  document.getElementById('modal-backdrop').scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+}
+
+function navigateModal(dir) {
+  const next = currentIndex + dir;
+  if (next >= 0 && next < LAWS.length) {
+    currentIndex = next;
+    renderModal();
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('modal-backdrop').classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowRight') navigateModal(1);
+  if (e.key === 'ArrowLeft') navigateModal(-1);
+});
+</script>
+</body>
+</html>
