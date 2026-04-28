@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Art of War — Sun Tzu</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #1a1410;
+  --rice:      #f6f1e4;
+  --aged:      #ece4cd;
+  --parchment: #dfd6bc;
+  --muted:     #7a6e5f;
+  --rule:      #cdc3a8;
+  --vermillion:#b83220;
+
+  /* 5 category colors — ink-wash palette */
+  --cat-ps: #1a2744;   /* Planning & Strategy — deep navy */
+  --cat-dt: #6b1a1a;   /* Deception & Intelligence — deep crimson */
+  --cat-tp: #1e3a2a;   /* Terrain & Position — forest ink */
+  --cat-fm: #5a3810;   /* Forces & Momentum — burnt amber */
+  --cat-ad: #2a1e4a;   /* Adaptability — deep indigo */
+
+  --cat-ps-light: #e8ecf4;
+  --cat-dt-light: #f4e8e8;
+  --cat-tp-light: #e6f0ea;
+  --cat-fm-light: #f2ede3;
+  --cat-ad-light: #ece8f4;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--rice);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+  font-size: 15px;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--ink);
+  color: var(--rice);
+  padding: 3.5rem 2rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,.02) 39px, rgba(255,255,255,.02) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,.012) 59px, rgba(255,255,255,.012) 60px);
+}
+header::after {
+  content: '兵';
+  position: absolute;
+  font-size: 22rem;
+  color: rgba(255,255,255,.025);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  line-height: 1;
+  font-family: serif;
+}
+.header-inner { position: relative; z-index: 1; }
+
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--vermillion);
+  margin-bottom: .8rem;
+}
+
+/* Brushstroke rule above title */
+.brush-rule {
+  width: 60px;
+  height: 3px;
+  background: var(--vermillion);
+  margin: 0 auto .9rem;
+  opacity: .8;
+  clip-path: polygon(0 20%, 100% 0%, 100% 80%, 0% 100%);
+}
+
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 7vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.015em;
+}
+header h1 em { font-style: italic; font-weight: 400; color: var(--vermillion); }
+.header-subtitle {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: .95rem;
+  color: rgba(246,241,228,.45);
+  margin-top: .4rem;
+  letter-spacing: .04em;
+}
+.header-author {
+  margin-top: .55rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem;
+  letter-spacing: .15em;
+  color: rgba(246,241,228,.4);
+}
+.header-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem 1.2rem;
+  margin-top: 2rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(246,241,228,.55);
+  cursor: pointer;
+  transition: color .2s;
+}
+.legend-item:hover { color: var(--rice); }
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--aged);
+  border-bottom: 1px solid var(--rule);
+  padding: .65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: .25rem;
+}
+.filter-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .35rem .9rem;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .18s;
+  border-radius: 2px;
+}
+.filter-btn:hover { color: var(--ink); border-color: var(--ink); }
+.filter-btn.active { color: var(--rice); border-color: transparent; }
+.filter-btn[data-cat="all"].active  { background: var(--ink); }
+.filter-btn[data-cat="ps"].active   { background: var(--cat-ps); }
+.filter-btn[data-cat="dt"].active   { background: var(--cat-dt); }
+.filter-btn[data-cat="tp"].active   { background: var(--cat-tp); }
+.filter-btn[data-cat="fm"].active   { background: var(--cat-fm); }
+.filter-btn[data-cat="ad"].active   { background: var(--cat-ad); }
+
+/* ── COUNT BAR ── */
+.count-bar {
+  padding: .7rem 1.25rem;
+  background: var(--rice);
+  border-bottom: 1px solid var(--rule);
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── GRID ── */
+.grid-wrap { padding: 1.25rem; max-width: 1100px; margin: 0 auto; }
+.chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: .85rem;
+}
+
+/* ── CHAPTER CARD ── */
+.chapter-card {
+  border: 1px solid var(--rule);
+  border-top: 3px solid;
+  background: #fff;
+  padding: 1rem 1rem 1.1rem;
+  cursor: pointer;
+  transition: box-shadow .2s, transform .15s;
+  position: relative;
+  overflow: hidden;
+}
+.chapter-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.chapter-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.1); transform: translateY(-2px); }
+.chapter-card:hover::after { opacity: 1; }
+.chapter-card.hidden { display: none; }
+
+.chapter-card[data-cat="ps"] { border-top-color: var(--cat-ps); }
+.chapter-card[data-cat="ps"]::after { background: linear-gradient(135deg, var(--cat-ps-light), transparent 60%); }
+.chapter-card[data-cat="dt"] { border-top-color: var(--cat-dt); }
+.chapter-card[data-cat="dt"]::after { background: linear-gradient(135deg, var(--cat-dt-light), transparent 60%); }
+.chapter-card[data-cat="tp"] { border-top-color: var(--cat-tp); }
+.chapter-card[data-cat="tp"]::after { background: linear-gradient(135deg, var(--cat-tp-light), transparent 60%); }
+.chapter-card[data-cat="fm"] { border-top-color: var(--cat-fm); }
+.chapter-card[data-cat="fm"]::after { background: linear-gradient(135deg, var(--cat-fm-light), transparent 60%); }
+.chapter-card[data-cat="ad"] { border-top-color: var(--cat-ad); }
+.chapter-card[data-cat="ad"]::after { background: linear-gradient(135deg, var(--cat-ad-light), transparent 60%); }
+
+.card-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: .12;
+  position: absolute;
+  right: .75rem;
+  top: .6rem;
+}
+.card-cat-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .45rem;
+  position: relative;
+  z-index: 1;
+}
+.chapter-card[data-cat="ps"] .card-cat-tag { color: var(--cat-ps); }
+.chapter-card[data-cat="dt"] .card-cat-tag { color: var(--cat-dt); }
+.chapter-card[data-cat="tp"] .card-cat-tag { color: var(--cat-tp); }
+.chapter-card[data-cat="fm"] .card-cat-tag { color: var(--cat-fm); }
+.chapter-card[data-cat="ad"] .card-cat-tag { color: var(--cat-ad); }
+
+.card-chapter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: .2rem;
+  position: relative;
+  z-index: 1;
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: .92rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  position: relative;
+  z-index: 1;
+}
+.card-summary {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: .4rem;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── MODAL ── */
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,16,.72);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+.modal-backdrop.open { display: flex; align-items: flex-start; justify-content: center; }
+
+.modal {
+  background: var(--rice);
+  width: 100%;
+  max-width: 640px;
+  position: relative;
+  animation: modalIn .22s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-stripe { height: 5px; width: 100%; }
+.modal-head {
+  padding: 1.5rem 1.75rem 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-chapter-meta {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .6rem;
+}
+.modal-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: .15;
+}
+.modal-cat-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: .25rem .65rem;
+  border-radius: 2px;
+  color: var(--rice);
+}
+.modal-chapter-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: .3rem;
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+/* Core teaching quote */
+.modal-quote {
+  margin-top: .9rem;
+  padding: .7rem 1rem .7rem 1.2rem;
+  border-left: 3px solid var(--vermillion);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: .9rem;
+  line-height: 1.6;
+  color: #3a2e20;
+}
+
+.modal-body { padding: 1.5rem 1.75rem; }
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--vermillion);
+  margin-bottom: .35rem;
+  margin-top: 1.25rem;
+  display: block;
+}
+.section-label:first-child { margin-top: 0; }
+
+.modal-summary {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+.modal-text {
+  font-size: .88rem;
+  line-height: 1.75;
+  color: #2e2820;
+}
+.modal-callout {
+  background: var(--aged);
+  border-left: 2px solid var(--vermillion);
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  line-height: 1.65;
+  margin: .75rem 0 0;
+}
+.modal-reversal {
+  background: var(--parchment);
+  border-left: 2px solid var(--muted);
+  padding: .75rem 1rem;
+  font-size: .85rem;
+  line-height: 1.65;
+  margin-top: .75rem;
+  color: var(--muted);
+}
+
+.modal-close {
+  position: absolute;
+  top: .85rem; right: .85rem;
+  background: none; border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: .7rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  cursor: pointer;
+  padding: .35rem .6rem;
+  transition: color .15s;
+  text-transform: uppercase;
+}
+.modal-close:hover { color: var(--ink); }
+
+.modal-nav {
+  display: flex;
+  border-top: 1px solid var(--rule);
+  background: var(--aged);
+}
+.modal-nav-btn {
+  flex: 1;
+  padding: .85rem;
+  background: none;
+  border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color .15s, background .15s;
+}
+.modal-nav-btn:hover { color: var(--ink); background: var(--parchment); }
+.modal-nav-btn:first-child { border-right: 1px solid var(--rule); }
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .65rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+}
+
+@media (max-width: 480px) {
+  .chapters-grid { grid-template-columns: 1fr 1fr; }
+  .modal-body { padding: 1.25rem 1.25rem; }
+  .modal-head { padding: 1.25rem 1.25rem 1rem; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <p class="eyebrow">Book Notes &amp; Reference</p>
+    <div class="brush-rule"></div>
+    <h1>The Art<br><em>of War</em></h1>
+    <p class="header-subtitle">孫子兵法 · Sūnzǐ Bīngfǎ</p>
+    <p class="header-author">Sun Tzu · c. 500 BCE · 13 Chapters</p>
+    <div class="header-legend">
+      <span class="legend-item" onclick="setFilter('ps')">
+        <span class="legend-dot" style="background:var(--cat-ps)"></span> Planning &amp; Strategy
+      </span>
+      <span class="legend-item" onclick="setFilter('dt')">
+        <span class="legend-dot" style="background:var(--cat-dt)"></span> Deception &amp; Intelligence
+      </span>
+      <span class="legend-item" onclick="setFilter('tp')">
+        <span class="legend-dot" style="background:var(--cat-tp)"></span> Terrain &amp; Position
+      </span>
+      <span class="legend-item" onclick="setFilter('fm')">
+        <span class="legend-dot" style="background:var(--cat-fm)"></span> Forces &amp; Momentum
+      </span>
+      <span class="legend-item" onclick="setFilter('ad')">
+        <span class="legend-dot" style="background:var(--cat-ad)"></span> Adaptability &amp; Response
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" data-cat="all" onclick="setFilter('all')">All 13</button>
+  <button class="filter-btn" data-cat="ps" onclick="setFilter('ps')">Planning &amp; Strategy</button>
+  <button class="filter-btn" data-cat="dt" onclick="setFilter('dt')">Deception &amp; Intelligence</button>
+  <button class="filter-btn" data-cat="tp" onclick="setFilter('tp')">Terrain &amp; Position</button>
+  <button class="filter-btn" data-cat="fm" onclick="setFilter('fm')">Forces &amp; Momentum</button>
+  <button class="filter-btn" data-cat="ad" onclick="setFilter('ad')">Adaptability &amp; Response</button>
+</div>
+
+<div class="count-bar">
+  <span id="count-label">Showing all 13 chapters</span>
+  <span style="opacity:.5">Click any card to open</span>
+</div>
+
+<div class="grid-wrap">
+  <div class="chapters-grid" id="grid"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-stripe" id="modal-stripe"></div>
+    <button class="modal-close" onclick="closeModal()">✕ Close</button>
+    <div class="modal-head">
+      <div class="modal-chapter-meta">
+        <span class="modal-num" id="modal-num"></span>
+        <span class="modal-cat-badge" id="modal-badge"></span>
+      </div>
+      <div class="modal-chapter-label" id="modal-chapter-label"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-quote" id="modal-quote"></div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-nav">
+      <button class="modal-nav-btn" id="btn-prev" onclick="navigateModal(-1)">← Previous</button>
+      <button class="modal-nav-btn" id="btn-next" onclick="navigateModal(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Notes based on Sun Tzu, <em>The Art of War</em> (c. 500 BCE) · Translation references: Giles (1910), Griffith (1963), Minford (2002) · For personal study only
+</footer>
+
+<script>
+const CAT = {
+  ps: { label: 'Planning & Strategy',        color: 'var(--cat-ps)' },
+  dt: { label: 'Deception & Intelligence',   color: 'var(--cat-dt)' },
+  tp: { label: 'Terrain & Position',         color: 'var(--cat-tp)' },
+  fm: { label: 'Forces & Momentum',          color: 'var(--cat-fm)' },
+  ad: { label: 'Adaptability & Response',    color: 'var(--cat-ad)' },
+};
+
+const CHAPTERS = [
+  {
+    n: 1, cat: 'ps',
+    title: 'Laying Plans',
+    subtitle: '始計 · Shǐ Jì',
+    quote: 'The art of war is of vital importance to the State. It is a matter of life and death, a road either to safety or to ruin.',
+    summary: 'Before any campaign, calculate five constant factors — Moral Law, Heaven, Earth, Commander, and Method — to know who will win.',
+    insight: 'Victory is determined before the first move. The general who calculates many factors before battle has more chances of winning than one who calculates few. Assessment is not preparation for war — it is the first act of war. Sun Tzu\'s five factors (political unity, climate and timing, terrain, leadership quality, and organisational discipline) are the variables in every strategic equation.',
+    application: 'Before any major initiative, audit your five factors honestly. Where does your cause have moral authority? What are the environmental conditions — timing, market, culture? What is the terrain — competitive landscape, constraints? How strong is your leadership? How disciplined your organisation? The side with the most honest answers, not the most confident ones, wins.',
+    reversal: 'Over-analysis creates paralysis. Sun Tzu\'s calculations are pre-conditions for action, not substitutes for it. A general who calculates endlessly and never moves loses to the one who calculates well enough and acts.',
+    example: 'The Allies\' D-Day planning in 1944 exemplified this chapter: years of calculation, intelligence gathering, assessment of terrain, weather timing, and morale. The meticulous planning — not the beaches — decided the outcome before a single soldier landed.'
+  },
+  {
+    n: 2, cat: 'fm',
+    title: 'Waging War',
+    subtitle: '作戰 · Zuò Zhàn',
+    quote: 'There is no instance of a country having benefited from prolonged warfare.',
+    summary: 'Speed and efficiency are decisive — a long campaign drains resources, weakens troops, and invites disaster even for the victor.',
+    insight: 'War is expensive. The longer it continues, the more it costs — in resources, morale, and political capital — regardless of who is winning. The optimal campaign ends quickly through superior preparation and decisive action, not through attrition. Sun Tzu calculates the actual costs of a large army in the field: chariots, provisions, upkeep. The general who cannot read these costs will spend the kingdom winning a battle and losing the war.',
+    application: 'In any competitive engagement — negotiation, litigation, market competition — calculate the total cost of a prolonged fight versus a decisive early resolution. Often a rapid, overwhelming commitment that resolves the matter quickly is cheaper than a drawn-out campaign even if the daily cost appears lower. Know when prolonging a conflict benefits your opponent more than you.',
+    reversal: 'The pressure to move quickly can lead to under-preparation. Speed without readiness is recklessness. The law is not "always be fast" — it is "be efficient." Sometimes a pause to consolidate is the fastest path to resolution.',
+    example: 'Napoleon\'s early campaigns — Austerlitz, Jena, Wagram — were models of decisive speed. His later campaigns, especially Russia in 1812, violated this chapter completely: the army that had won by rapid decision-making lost by becoming trapped in a prolonged campaign its logistics could not sustain.'
+  },
+  {
+    n: 3, cat: 'dt',
+    title: 'Attack by Stratagem',
+    subtitle: '謀攻 · Móu Gōng',
+    quote: 'Supreme excellence consists in breaking the enemy\'s resistance without fighting.',
+    summary: 'The highest form of generalship is to defeat the enemy\'s strategy before battle; the lowest is to besiege walled cities.',
+    insight: 'Fighting is a failure of strategy. The hierarchy of excellence is: attack the enemy\'s plans (prevent conflict entirely), attack alliances (isolate the enemy), attack the army (fight in the field), attack cities (most costly and least elegant). Each descending level represents a failure of the levels above. The best victories are the ones the opponent never knew happened — where their strategy collapsed before engagement.',
+    application: 'In any conflict, identify what your opponent is counting on — their key assumption, their critical alliance, their necessary resource — and strike there. Don\'t attack their strength directly; attack the conditions that make their strength possible. The smartest legal strategy makes the case impossible before it reaches court. The smartest competitive strategy makes the market move before a rival can respond.',
+    reversal: 'Stratagem without the capability to follow through is a bluff. The threat that makes the enemy\'s strategy collapse must be credible. If your opponent correctly calculates that you cannot execute, attacking their plans fails — and you must revert to force you may not have.',
+    example: 'The Cold War doctrine of Mutually Assured Destruction was a direct application of this chapter: neither superpower attacked the other\'s army or cities. Instead, the strategy was to make conflict strategically irrational — destroying the enemy\'s plan by making its success indistinguishable from its failure.'
+  },
+  {
+    n: 4, cat: 'tp',
+    title: 'Tactical Dispositions',
+    subtitle: '軍形 · Jūn Xíng',
+    quote: 'The good fighters of old first put themselves beyond the possibility of defeat, and then waited for an opportunity of defeating the enemy.',
+    summary: 'Invincibility lies in your own hands; the opportunity to defeat the enemy is provided by the enemy himself.',
+    insight: 'There is an asymmetry between defence and offence: you control your own invincibility, but you cannot manufacture your opponent\'s vulnerability — you can only exploit it when it appears. The disciplined general first ensures they cannot lose, then waits for the moment when the opponent creates the conditions of their own defeat. Securing against defeat is in your power; guaranteeing victory requires the enemy\'s error.',
+    application: 'In any competitive situation, first build a position that cannot be destroyed — financial reserves, operational resilience, legal protection, diverse relationships. Do not launch offensives until this base is secure. The urgency to attack before you are ready is the source of most strategic disasters. Patience in position is not passivity; it is the accumulation of winning conditions.',
+    reversal: 'A strategy of pure defence never wins — it only prevents losing. Waiting for the opponent\'s error works only if you are prepared to exploit it instantly when it comes. The invincible general must also be the prepared attacker.',
+    example: 'Wellington\'s strategy in the Peninsular War (1808–1814) is a textbook application: he built a defensive position in Portugal that could not be defeated (the Lines of Torres Vedras), drained the French through guerrilla pressure, and waited until the strategic conditions shifted decisively before attacking. He never fought until he could win.'
+  },
+  {
+    n: 5, cat: 'fm',
+    title: 'Energy',
+    subtitle: '兵勢 · Bīng Shì',
+    quote: 'The onset of troops is like the rush of a torrent which will even roll stones along in its course.',
+    summary: 'Direct force and indirect manoeuvre combine to generate the momentum (shì) that carries armies to victory.',
+    insight: 'Sun Tzu distinguishes between zhèng (direct, orthodox force) and qí (indirect, unorthodox manoeuvre). Neither alone wins; it is their combination that produces shì — momentum, positional force, the energy of a situation that compels a particular outcome. The general who creates overwhelming shì makes victory feel inevitable before it is complete. Like a coiled crossbow, the energy must be stored precisely and released at exactly the right moment.',
+    application: 'In any campaign, identify your direct approach (what the opponent expects) and your indirect approach (what creates genuine surprise). The direct force holds attention and fixes the opponent; the indirect force decides the outcome. In business: the expected product launch holds market attention while the strategic partnership changes the competitive landscape. Never rely on force alone — use force to create the conditions for leverage.',
+    reversal: 'Indirect force without the direct element leaves flanks exposed. A strategy of pure cunning with no conventional strength is fragile — it depends entirely on the opponent not discovering the manoeuvre. Combine both, and each makes the other stronger.',
+    example: 'The German blitzkrieg in 1940 embodied this principle: conventional forces fixed the Allied armies along expected lines (direct/zhèng) while armour poured through the Ardennes — the "impossible" route — to encircle and collapse the entire defensive position (indirect/qí). The Allies prepared against the direct attack and were destroyed by the indirect.'
+  },
+  {
+    n: 6, cat: 'dt',
+    title: 'Weak Points and Strong',
+    subtitle: '虛實 · Xū Shí',
+    quote: 'Whoever is first in the field and awaits the coming of the enemy will be fresh for the fight; whoever is second in the field and has to hasten to battle will arrive exhausted.',
+    summary: 'Attack where the enemy is empty (xū); avoid where they are full (shí); shape the battle so they must respond to you.',
+    insight: 'The key to strategic advantage is controlling initiative — forcing the opponent to respond to your movements while you remain free to act. By rushing to the field first, you set the terms. By attacking what the opponent must defend, you dictate their movements. Sun Tzu\'s insight is that strength and weakness are not fixed properties of armies — they are created by positioning, timing, and initiative. Your strength is wherever the opponent is weak; their strength is wherever you are absent.',
+    application: 'Control the agenda in any competition. Force opponents to react to your timing, your ground, your terms. When you must engage, attack the gaps — the understaffed competitor, the unmet customer need, the unguarded flank. When you cannot avoid strength, refuse engagement and relocate the contest to terrain where you are strong and they are empty. Never give opponents the battle they have prepared for.',
+    reversal: 'Being first in the field demands resources. Holding position and waiting is expensive in time and initiative if the opponent refuses to engage. The first-mover advantage flips if the opponent correctly identifies your position and chooses a different field entirely.',
+    example: 'Amazon\'s expansion into new markets repeatedly followed this chapter: enter where no established player is dominant (xū), force incumbents to defend their core while Amazon operates in new territory. By the time incumbents respond, Amazon has turned the empty space into strength.'
+  },
+  {
+    n: 7, cat: 'tp',
+    title: 'Maneuvering',
+    subtitle: '軍爭 · Jūn Zhēng',
+    quote: 'In war, practice dissimulation, and you will succeed. Move only if there is a real advantage to be gained.',
+    summary: 'The hardest thing in war is to turn the tortuous into the direct, and misfortune into gain — this is the art of manoeuvring.',
+    insight: 'The direct path is obvious and therefore expected. The general who masters manoeuvre finds the advantage in apparent disadvantage — the difficult route that arrives first because no one believed it possible, the slowness that positions for decisive speed. Sun Tzu also gives one of his most practical observations here: armies cannot move and communicate simultaneously. Manoeuvre requires understanding the limits of coordination and exploiting them in the enemy while managing them in yourself.',
+    application: 'When blocked on the direct route, look for the path no one is defending because no one thinks it possible. Difficult approaches are often unguarded. Carry advantage with you — speed, supplies, morale — enough to execute the manoeuvre. Be cautious about stripping essential forces from supporting roles; a unit that has marched too fast arrives broken even if it arrives first.',
+    reversal: 'Overly complex manoeuvre destroys cohesion. The plan that requires ten things to go right will fail when three of them don\'t. Manoeuvre must be proportional to the coordination capability of the force executing it. Simplicity with surprise beats complexity with uncertainty.',
+    example: 'Hannibal\'s approach to Cannae (216 BCE) was a masterpiece of this chapter: marching through territory Rome considered impassable, he arrived where he was not expected, chose the ground, and executed a double-envelopment that destroyed a vastly larger Roman army through manoeuvre rather than superior force.'
+  },
+  {
+    n: 8, cat: 'ad',
+    title: 'Variation in Tactics',
+    subtitle: '九變 · Jiǔ Biàn',
+    quote: 'The general who thoroughly understands the advantages that accompany variation of tactics knows how to handle his troops.',
+    summary: 'A general who knows only fixed rules is a liability; true mastery lies in knowing when to break them.',
+    insight: 'There are roads not to be travelled, armies not to be attacked, cities not to be besieged, grounds not to be contested — and commanders who cannot identify when the rule applies and when it doesn\'t will follow doctrine into destruction. Sun Tzu lists five dangerous faults in a commander: recklessness, cowardice, a short temper, a delicacy of honour (pride), and over-concern for the troops. Each is a predictable lever the enemy can pull. Invulnerability comes from having no fixed responses.',
+    application: 'Identify your own predictable patterns — how you respond to aggression, to opportunity, to flattery, to threat. Each pattern is a vulnerability the competent opponent will exploit. Vary your responses so no single trigger reliably produces a specific reaction. At the same time, know which standard rules exist for good reasons and should be violated only deliberately, not by default.',
+    reversal: 'Perpetual variation without an underlying strategic logic becomes chaos. The art is varying tactics in service of consistent strategic objectives — the endgame does not change; only the path to it varies. Random variation is not adaptability; it is noise.',
+    example: 'Napoleon is often cited here: he won by never fighting the battle his opponent had prepared for, always varying his approach. He lost at Waterloo partly because Wellington, who had studied him deeply, finally correctly anticipated and prepared for Napoleon\'s patterns — the five dangerous faults (particularly impetuousness) had become predictable.'
+  },
+  {
+    n: 9, cat: 'tp',
+    title: 'The Army on the March',
+    subtitle: '行軍 · Xíng Jūn',
+    quote: 'We are not fit to lead an army on the march unless we are familiar with the face of the country — its mountains and forests, its pitfalls and precipices, its marshes and swamps.',
+    summary: 'Situational awareness — reading terrain, weather, animal behaviour, and the enemy\'s camp — is the intelligence the moving army must constantly generate.',
+    insight: 'This chapter is a manual of observation. Sun Tzu describes how to read the signs of the landscape and the signs of the enemy: how dust rises in different formations, what the behaviour of birds reveals about concealed forces, how the enemy\'s water and wood-gathering patterns indicate their strength. The army that moves through the world with maximum perceptual awareness is never surprised — and the one that moves blind is always at risk, regardless of its strength.',
+    application: 'Situational awareness is the competitive intelligence function. Know your environment not just in the abstract but through constant, active reading of real signals: what are competitors actually doing (not what they say), what are customers responding to in behaviour (not surveys), what do the leading indicators show before the lagging ones confirm it? The general who can read the dust knows what is coming.',
+    reversal: 'An excess of intelligence-gathering without action is analysis paralysis. The signs must be read and then acted on with appropriate speed. The goal of awareness is to enable decisive action, not to endlessly defer it pending more information.',
+    example: 'The Battle of Midway (1942) was decided by intelligence — American cryptanalysts reading Japanese signals to identify the target as Midway before the fleet sailed. The Americans arrived in position first precisely because they read the signs that Sun Tzu described, and acted on them before the stronger force could achieve surprise.'
+  },
+  {
+    n: 10, cat: 'tp',
+    title: 'Classification of Terrain',
+    subtitle: '地形 · Dì Xíng',
+    quote: 'If you know the enemy and know yourself, your victory will not stand in doubt; if you know Heaven and know Earth, you may make your victory complete.',
+    summary: 'Six types of terrain create six fundamentally different tactical situations — the general who misreads the ground is already defeated.',
+    insight: 'Sun Tzu classifies terrain as accessible, entangling, temporising, narrow, precipitous, or distant — and for each, prescribes different doctrine. The deepest point of the chapter is that faulty generalship, not bad luck, is the source of most military disasters. He lists six types of defeat that come not from the enemy but from the commander: flight (attacking the numerically superior), insubordination (weak men in strong positions), collapse (ill-trained officers), ruin (officers\' pride provoking unordered engagement), disorganisation (weak generalship), and rout (failure to estimate enemy strength). The ground and the army\'s relationship to it is the test of a commander\'s knowledge.',
+    application: 'Know the terrain of every competition you enter: what are the structural features that advantage different players? Where is the ground that advantaged competitors will defend? Where is the ground that no one currently holds? Map the terrain honestly before committing. The general who chooses good ground has already done most of the work before the first engagement.',
+    reversal: 'Terrain analysis can create excessive caution — refusing to engage on any ground that is not ideal. In practice, you rarely get to choose ideal ground. The skill is maximising advantage on whatever ground you have, and understanding which disadvantages are acceptable and which are fatal.',
+    example: 'The Spartans\' selection of Thermopylae in 480 BCE converted numerical weakness into a positional advantage: the narrow pass rendered Persia\'s massive numerical superiority irrelevant. A force of 7,000 held 200,000+ for three days. The terrain, not the soldiers, was the weapon.'
+  },
+  {
+    n: 11, cat: 'ad',
+    title: 'The Nine Situations',
+    subtitle: '九地 · Jiǔ Dì',
+    quote: 'On desperate ground, fight.',
+    summary: 'Nine distinct strategic situations — from dispersive home ground to death ground — each demand a fundamentally different response from the commander.',
+    insight: 'The nine situations (dispersive, facile, contentious, open, intersecting, serious, difficult, hemmed-in, desperate) describe not terrain but the strategic situation of the army relative to its commitments and options. The most counterintuitive insight is death ground: when there is no escape, soldiers fight with the desperation that makes them unstoppable. Sun Tzu notes that in deep enemy territory, soldiers have no home to retreat to and no choice but to fight — their desperation becomes a resource. The general must sometimes engineer this situation deliberately.',
+    application: 'Recognise what situation you are actually in, not the one you wish you were in. Each of the nine situations requires different action: on dispersive ground (early conflict near home), hold; on serious ground (deep in enemy territory), plunder; on death ground, fight with everything. The error is applying the doctrine of one situation to another. Burning your ships — manufacturing death ground — is a legitimate leadership tactic when the alternative is half-committed engagement.',
+    reversal: 'Death ground is genuinely dangerous — manufactured commitment can produce desperation that destroys rather than liberates. Cortés burning his ships worked; it does not always work. The technique amplifies whatever qualities the force already has. On a poor force, engineered desperation produces rout, not heroism.',
+    example: 'The Israeli military doctrine of "no strategic depth" — the recognition that the country cannot afford to lose a single war because there is nowhere to retreat to — is a continuous existence on death ground. That recognition has shaped an extraordinary investment in military capability that a country with more room to absorb defeat might not have made.'
+  },
+  {
+    n: 12, cat: 'fm',
+    title: 'The Attack by Fire',
+    subtitle: '火攻 · Huǒ Gōng',
+    quote: 'The enlightened ruler is heedful, and the good general full of caution.',
+    summary: 'There are five ways to attack with fire — and the general who acts from passion rather than calculation throws away what victory has gained.',
+    insight: 'Sun Tzu devotes most of this chapter to the conditions and methods of fire attack, but its deepest teaching is in the final paragraphs: the ruler who launches campaigns from anger, and the general who attacks from resentment, will destroy what they set out to protect. Anger subsides; the dead do not return. The test of any aggressive action is whether it serves the strategic objective or merely the emotion of the commander. Sun Tzu makes the extraordinary point that the enlightened ruler does not launch a campaign simply because it can be won — only because it must be fought.',
+    application: 'Before any aggressive initiative, check your motivation. If the primary driver is anger, ego, or the desire to punish, the analysis is likely to be distorted. Campaigns launched from emotion tend to over-commit, set wrong objectives, and resist correction when they go wrong. Ask instead: is this campaign necessary? Can we achieve our strategic objectives without it? The bar for action should be need, not capability.',
+    reversal: 'Excessive caution in the face of genuine necessity is as dangerous as aggression from emotion. The general who is "full of caution" still acts — they simply ensure the action is dictated by strategic logic. The reversal of this chapter is paralysis disguised as prudence.',
+    example: 'The U.S. invasion of Iraq in 2003 is a modern illustration of this chapter\'s warning. The campaign was technically winnable; it was launched partly from emotion and institutional momentum after 9/11. The strategic objectives were unclear, the post-victory planning was inadequate, and the costs — human and geopolitical — vastly exceeded what the strategic outcome justified.'
+  },
+  {
+    n: 13, cat: 'dt',
+    title: 'The Use of Spies',
+    subtitle: '用間 · Yòng Jiān',
+    quote: 'If you know the enemy and know yourself, you need not fear the result of a hundred battles.',
+    summary: 'Intelligence gathered by human agents is the decisive factor in war — it cannot be replaced by divination, calculation, or experience alone.',
+    insight: 'Sun Tzu ends his treatise here, not with a grand battlefield principle but with intelligence. This is deliberate: all the strategy, terrain mastery, and tactical flexibility that precede this chapter are only as good as the knowledge that underlies them. He describes five types of agents (local, internal, converted double agents, doomed agents sent with false intelligence to die, and surviving agents) and the network their interlocking use creates. The enlightened ruler and wise general use intelligence lavishly because no other investment yields comparable returns.',
+    application: 'Invest disproportionately in knowing your competitive environment. Talk to customers before and after they choose you or a competitor. Hire people with inside knowledge of the industries you enter. Build genuine relationships across the landscape — not as manipulation, but as a structural source of signal. The gap between what you believe about your environment and what is actually true is the single most dangerous gap in any strategy.',
+    reversal: 'Intelligence networks create their own vulnerabilities: the converted double agent may be feeding you what the enemy wants you to believe. Every intelligence system can be compromised. The general who trusts intelligence absolutely without testing it for internal consistency and plausibility is as vulnerable as one who ignores it.',
+    example: 'The Double Cross System in World War II — where British intelligence turned virtually every German agent in Britain and used them to feed false information — is the most successful espionage operation in history. It worked because of Sun Tzu\'s own doctrine applied against its practitioners: the Germans were using intelligence lavishly but failed to test it for the internal contradictions that would have revealed the deception.'
+  }
+];
+
+// ── BUILD GRID ──
+const grid = document.getElementById('grid');
+CHAPTERS.forEach((ch, i) => {
+  const card = document.createElement('div');
+  card.className = 'chapter-card';
+  card.dataset.cat = ch.cat;
+  card.dataset.index = i;
+  card.onclick = () => openModal(i);
+  card.innerHTML = `
+    <div class="card-num">${ch.n}</div>
+    <div class="card-cat-tag">${CAT[ch.cat].label}</div>
+    <div class="card-chapter-label">Chapter ${ch.n}</div>
+    <div class="card-title">${ch.title}</div>
+    <div class="card-summary">${ch.summary}</div>
+  `;
+  grid.appendChild(card);
+});
+
+// ── FILTER ──
+let currentFilter = 'all';
+function setFilter(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.filter-btn[data-cat="${cat}"]`).classList.add('active');
+
+  const cards = document.querySelectorAll('.chapter-card');
+  let visible = 0;
+  cards.forEach(c => {
+    const show = cat === 'all' || c.dataset.cat === cat;
+    c.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  const label = cat === 'all'
+    ? 'Showing all 13 chapters'
+    : `Showing ${visible} chapter${visible !== 1 ? 's' : ''} — ${CAT[cat].label}`;
+  document.getElementById('count-label').textContent = label;
+}
+
+// ── MODAL ──
+let currentIndex = 0;
+
+function openModal(index) {
+  currentIndex = index;
+  renderModal();
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderModal() {
+  const ch = CHAPTERS[currentIndex];
+  const cat = CAT[ch.cat];
+
+  document.getElementById('modal-stripe').style.background = cat.color;
+  document.getElementById('modal-num').textContent = ch.n;
+
+  const badge = document.getElementById('modal-badge');
+  badge.textContent = cat.label;
+  badge.style.background = cat.color;
+
+  document.getElementById('modal-chapter-label').textContent = `Chapter ${ch.n} · ${ch.subtitle}`;
+  document.getElementById('modal-title').textContent = ch.title;
+  document.getElementById('modal-quote').textContent = `"${ch.quote}"`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <span class="section-label">Core Teaching</span>
+    <div class="modal-summary">${ch.summary}</div>
+
+    <span class="section-label">Key Insight</span>
+    <div class="modal-text">${ch.insight}</div>
+
+    <span class="section-label">Application</span>
+    <div class="modal-callout">${ch.application}</div>
+
+    <span class="section-label">Reversal</span>
+    <div class="modal-reversal">${ch.reversal}</div>
+
+    <span class="section-label">Historical Example</span>
+    <div class="modal-text" style="font-style:italic;color:var(--muted)">${ch.example}</div>
+  `;
+
+  const prevCh = currentIndex > 0 ? CHAPTERS[currentIndex - 1] : null;
+  const nextCh = currentIndex < CHAPTERS.length - 1 ? CHAPTERS[currentIndex + 1] : null;
+
+  const prevBtn = document.getElementById('btn-prev');
+  const nextBtn = document.getElementById('btn-next');
+  prevBtn.textContent = prevCh ? `← Ch. ${prevCh.n}: ${prevCh.title}` : '';
+  prevBtn.style.visibility = prevCh ? 'visible' : 'hidden';
+  nextBtn.textContent = nextCh ? `Ch. ${nextCh.n}: ${nextCh.title} →` : '';
+  nextBtn.style.visibility = nextCh ? 'visible' : 'hidden';
+
+  document.getElementById('modal-backdrop').scrollTop = 0;
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+}
+
+function navigateModal(dir) {
+  const next = currentIndex + dir;
+  if (next >= 0 && next < CHAPTERS.length) {
+    currentIndex = next;
+    renderModal();
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('modal-backdrop').classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowRight') navigateModal(1);
+  if (e.key === 'ArrowLeft') navigateModal(-1);
+});
+</script>
+</body>
+</html>
