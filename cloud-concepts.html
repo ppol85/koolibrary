@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Computing — Concepts & Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#1c2330; --border:#2a3441;
+  --amber:#f0a500; --cyan:#38bdf8; --text:#cdd5e0; --text-dim:#5a6a80;
+  --text-bright:#eaf0fb; --green:#4ade80; --red:#f87171; --purple:#a78bfa;
+  --sidebar-w:300px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;}
+
+/* ── LAYOUT ── */
+.layout{display:flex;min-height:100vh;}
+.main{flex:1;min-width:0;transition:margin-right .3s ease;}
+.main.sidebar-open{margin-right:var(--sidebar-w);}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:0;right:0;bottom:0;width:var(--sidebar-w);
+  background:var(--surface);border-left:1px solid var(--border);
+  z-index:200;transform:translateX(100%);transition:transform .3s ease;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sidebar.open{transform:translateX(0);}
+
+.sidebar-header{
+  padding:1.2rem 1.2rem .8rem;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.sidebar-eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.15em;
+  color:var(--amber);text-transform:uppercase;margin-bottom:.4rem;
+}
+.sidebar-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--text-bright);}
+.sidebar-close{
+  position:absolute;top:.9rem;right:.9rem;background:none;border:none;
+  color:var(--text-dim);cursor:pointer;font-size:.9rem;padding:.2rem .4rem;
+}
+.sidebar-close:hover{color:var(--text-bright);}
+
+.progress-wrap{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.progress-label{
+  font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.1em;
+  color:var(--text-dim);text-transform:uppercase;margin-bottom:.5rem;
+  display:flex;justify-content:space-between;
+}
+.progress-bar-bg{height:4px;background:var(--border);border-radius:2px;}
+.progress-bar-fill{height:4px;background:var(--amber);border-radius:2px;transition:width .4s ease;}
+.progress-counts{margin-top:.4rem;font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--text-dim);}
+
+.sidebar-scroll{flex:1;overflow-y:auto;padding:.5rem 0 2rem;}
+
+.stage-block{margin-bottom:.2rem;}
+.stage-header{
+  padding:.6rem 1.2rem .4rem;font-family:'IBM Plex Mono',monospace;
+  font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);
+  display:flex;align-items:center;gap:.5rem;
+}
+.stage-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.stage-dot.s1{background:var(--green);}
+.stage-dot.s2{background:var(--amber);}
+.stage-dot.s3{background:var(--cyan);}
+
+.path-item{
+  display:flex;align-items:center;gap:.6rem;padding:.45rem 1.2rem;
+  cursor:pointer;transition:background .12s;border:none;background:transparent;
+  width:100%;text-align:left;
+}
+.path-item:hover{background:var(--surface2);}
+.path-item.done .path-title{color:var(--text-dim);text-decoration:line-through;}
+
+.path-check{
+  width:16px;height:16px;border:1px solid var(--border);border-radius:2px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.path-item.done .path-check{background:var(--amber);border-color:var(--amber);}
+.check-icon{display:none;color:#000;font-size:.6rem;font-weight:700;}
+.path-item.done .check-icon{display:block;}
+
+.path-num{
+  font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:var(--text-dim);
+  width:16px;flex-shrink:0;text-align:center;
+}
+.path-title{font-size:.8rem;color:var(--text);line-height:1.3;}
+
+.sidebar-reset{
+  margin:.8rem 1.2rem 0;padding:.4rem;width:calc(100% - 2.4rem);
+  font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.08em;
+  text-transform:uppercase;background:transparent;border:1px solid var(--border);
+  color:var(--text-dim);cursor:pointer;transition:all .12s;
+}
+.sidebar-reset:hover{border-color:var(--red);color:var(--red);}
+
+/* ── SIDEBAR TOGGLE BUTTON ── */
+.sidebar-toggle{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:199;
+  background:var(--amber);border:none;border-radius:2px;
+  padding:.6rem 1rem;cursor:pointer;display:flex;align-items:center;gap:.5rem;
+  font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.08em;
+  color:#000;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.4);
+  transition:right .3s ease, transform .15s;
+}
+.sidebar-toggle:hover{transform:translateY(-1px);}
+.sidebar-toggle.sidebar-open{right:calc(var(--sidebar-w) + 1rem);}
+.toggle-progress-pip{
+  width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.55rem;font-weight:700;color:#000;
+}
+
+/* ── HEADER ── */
+header{border-bottom:1px solid var(--border);padding:2.2rem 2rem 1.8rem;position:relative;overflow:hidden;}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(240,165,0,.08) 0%,transparent 70%);pointer-events:none;}
+.header-inner{max-width:1060px;margin:0 auto;}
+.header-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:.18em;color:var(--amber);text-transform:uppercase;margin-bottom:.5rem;}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;color:var(--text-bright);line-height:1.1;}
+header h1 span{color:var(--amber);}
+.header-sub{margin-top:.6rem;font-size:.88rem;color:var(--text-dim);max-width:500px;line-height:1.6;}
+.header-meta{margin-top:1.2rem;display:flex;gap:1rem;flex-wrap:wrap;}
+.meta-pill{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.1em;padding:.28rem .75rem;border-radius:2px;border:1px solid var(--border);color:var(--text-dim);}
+.meta-pill.aws{border-color:#f59e0b44;color:#f59e0b;}
+.meta-pill.az{border-color:#38bdf844;color:#38bdf8;}
+.meta-pill.gcp{border-color:#4ade8044;color:#4ade80;}
+
+/* ── CONTROLS ── */
+.controls-wrap{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);}
+.controls{max-width:1060px;margin:0 auto;padding:.85rem 2rem;display:flex;flex-wrap:wrap;gap:.65rem;align-items:center;}
+.search-wrap{position:relative;flex:1;min-width:160px;max-width:280px;}
+.search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:.85rem;pointer-events:none;}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:.45rem .75rem .45rem 2rem;color:var(--text-bright);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.04em;outline:none;transition:border-color .14s;}
+.search-input::placeholder{color:var(--text-dim);}
+.search-input:focus{border-color:var(--amber);}
+.search-clear{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:.7rem;padding:.1rem .3rem;display:none;line-height:1;}
+.search-clear.visible{display:block;}
+.filter-group{display:flex;gap:.3rem;flex-wrap:wrap;}
+.filter-btn{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;padding:.35rem .78rem;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .13s;white-space:nowrap;}
+.filter-btn:hover{border-color:var(--amber);color:var(--amber);}
+.filter-btn.active{background:var(--amber);border-color:var(--amber);color:#000;font-weight:500;}
+.count-badge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--text-dim);white-space:nowrap;}
+
+/* ── LEGEND ── */
+.legend{max-width:1060px;margin:0 auto;padding:.6rem 2rem;display:flex;gap:1.3rem;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--text-dim);letter-spacing:.06em;border-bottom:1px solid var(--border);}
+.legend-item{display:flex;align-items:center;gap:.35rem;}
+.legend-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* ── NO RESULTS ── */
+.no-results{display:none;max-width:1060px;margin:4rem auto;padding:0 2rem;text-align:center;}
+.no-results.visible{display:block;}
+.no-results-title{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--text-dim);letter-spacing:.12em;margin-bottom:.5rem;}
+.no-results-sub{font-size:.85rem;color:var(--text-dim);}
+
+/* ── GRID ── */
+.grid{max-width:1060px;margin:1.3rem auto 5rem;padding:0 2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);}
+
+/* ── CARD ── */
+.card{background:var(--surface);padding:1.3rem;cursor:pointer;transition:background .13s;display:flex;flex-direction:column;gap:.55rem;}
+.card:hover{background:var(--surface2);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;}
+.card-tags{display:flex;gap:.27rem;flex-wrap:wrap;}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.07em;text-transform:uppercase;padding:.16rem .44rem;border-radius:1px;}
+.tag.cat-compute{background:rgba(240,165,0,.12);color:var(--amber);}
+.tag.cat-storage{background:rgba(56,189,248,.12);color:var(--cyan);}
+.tag.cat-network{background:rgba(167,139,250,.12);color:var(--purple);}
+.tag.cat-security{background:rgba(248,113,113,.12);color:var(--red);}
+.tag.cat-devops{background:rgba(74,222,128,.12);color:var(--green);}
+.tag.cat-cost{background:rgba(251,191,36,.12);color:#fbbf24;}
+.tag.plat{border:1px solid var(--border);color:var(--text-dim);background:transparent;}
+.tag.plat-aws{border-color:#f59e0b55;color:#f59e0b;}
+.tag.plat-azure{border-color:#38bdf855;color:#38bdf8;}
+.tag.plat-gcp{border-color:#4ade8055;color:#4ade80;}
+.level-dot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.level-dot.foundational{background:var(--green);}
+.level-dot.intermediate{background:var(--amber);}
+.card-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--text-bright);line-height:1.25;}
+.card-tagline{font-size:.78rem;color:var(--text-dim);line-height:1.5;}
+.card-hint{margin-top:auto;font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:var(--text-dim);letter-spacing:.06em;opacity:.42;}
+mark{background:rgba(240,165,0,.22);color:var(--amber);border-radius:1px;padding:0 1px;}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;padding:1.5rem;overflow-y:auto;backdrop-filter:blur(4px);}
+.overlay.open{display:flex;align-items:flex-start;justify-content:center;padding-top:3.5rem;}
+.modal{background:var(--surface);border:1px solid var(--border);max-width:660px;width:100%;position:relative;animation:slideUp .2s ease;}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-header{padding:1.4rem 1.4rem .9rem;border-bottom:1px solid var(--border);}
+.modal-close{position:absolute;top:.9rem;right:.9rem;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;line-height:1;padding:.3rem .5rem;transition:color .13s;}
+.modal-close:hover{color:var(--text-bright);}
+.modal-tags{display:flex;gap:.36rem;flex-wrap:wrap;margin-bottom:.7rem;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--text-bright);line-height:1.2;padding-right:2rem;}
+
+.mode-toggle{display:flex;margin:1rem 1.4rem 0;border:1px solid var(--border);border-radius:2px;overflow:hidden;width:fit-content;}
+.mode-btn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:.45rem 1rem;border:none;background:transparent;color:var(--text-dim);cursor:pointer;transition:all .13s;}
+.mode-btn.active{background:var(--amber);color:#000;font-weight:500;}
+
+.modal-body{padding:1.4rem;}
+.modal-pane{display:none;}
+.modal-pane.active{display:block;}
+.modal-section-label{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.52rem;}
+.modal-text{font-size:.9rem;line-height:1.72;color:var(--text);}
+.modal-text+.modal-section-label{margin-top:1.25rem;}
+
+.analogy-box{margin-top:1.1rem;padding:.9rem 1.1rem;border-left:2px solid var(--amber);background:rgba(240,165,0,.04);}
+.analogy-box .modal-section-label{color:var(--amber);}
+.analogy-box .modal-text{font-style:italic;font-size:.86rem;}
+
+.use-cases{list-style:none;display:flex;flex-direction:column;gap:.52rem;}
+.use-cases li{font-size:.86rem;line-height:1.55;color:var(--text);padding-left:1.2rem;position:relative;}
+.use-cases li::before{content:'→';position:absolute;left:0;color:var(--cyan);font-family:'IBM Plex Mono',monospace;}
+
+.platform-note{margin-top:1.25rem;padding:.85rem 1rem;border:1px solid var(--border);background:var(--bg);}
+.plat-row{display:flex;gap:.5rem;align-items:baseline;margin-top:.3rem;font-size:.8rem;}
+.plat-label{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--text-dim);width:52px;flex-shrink:0;}
+.plat-label.aws{color:#f59e0b;}
+.plat-label.azure{color:#38bdf8;}
+.plat-label.gcp{color:#4ade80;}
+
+/* visual pane */
+.visual-wrap{display:flex;justify-content:center;align-items:center;min-height:200px;padding:.5rem 0 1rem;}
+.visual-caption{margin-top:1rem;font-size:.8rem;line-height:1.6;color:var(--text-dim);font-style:italic;text-align:center;}
+
+/* mark as done button */
+.modal-done-row{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.8rem;}
+.done-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:.42rem .9rem;border:1px solid var(--border);background:transparent;color:var(--text-dim);
+  cursor:pointer;transition:all .13s;border-radius:2px;
+}
+.done-btn:not(.is-done):hover{border-color:var(--green);color:var(--green);}
+.done-btn.is-done{background:rgba(74,222,128,.1);border-color:var(--green);color:var(--green);}
+.done-btn.is-done:hover{background:rgba(248,113,113,.08);border-color:var(--red);color:var(--red);}
+.done-label{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--text-dim);letter-spacing:.06em;}
+
+.modal-nav{display:flex;justify-content:space-between;padding:.9rem 1.4rem;border-top:1px solid var(--border);gap:1rem;}
+.nav-btn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;padding:.45rem .9rem;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .13s;flex:1;text-align:center;}
+.nav-btn:hover:not(:disabled){border-color:var(--amber);color:var(--amber);}
+.nav-btn:disabled{opacity:.25;cursor:default;}
+
+@media(max-width:700px){
+  .main.sidebar-open{margin-right:0;}
+  .sidebar{width:100%;}
+  header{padding:1.4rem 1rem;}
+  .controls{padding:.7rem 1rem;}
+  .legend{padding:.55rem 1rem;}
+  .grid{padding:0 1rem;margin-top:1rem;grid-template-columns:1fr;}
+  .no-results{padding:0 1rem;}
+  .overlay{padding:.5rem;padding-top:2rem;}
+  .search-wrap{max-width:100%;}
+  .sidebar-toggle.sidebar-open{right:1rem;}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<div class="main" id="mainContent">
+
+<header>
+  <div class="header-inner">
+    <div class="header-eyebrow">// Technical Reference Guide</div>
+    <h1>Cloud Computing<br><span>Concepts & Practice</span></h1>
+    <p class="header-sub">A non-engineer's reference — understand what each concept is and when you'd actually use it at work or in personal projects.</p>
+    <div class="header-meta">
+      <span class="meta-pill aws">AWS</span>
+      <span class="meta-pill az">Azure</span>
+      <span class="meta-pill gcp">GCP</span>
+      <span class="meta-pill">Universal concepts</span>
+    </div>
+  </div>
+</header>
+
+<div class="controls-wrap">
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search concepts…" autocomplete="off" spellcheck="false">
+      <button class="search-clear" id="searchClear">✕</button>
+    </div>
+    <div class="filter-group" id="filterGroup">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="compute">Compute</button>
+      <button class="filter-btn" data-cat="storage">Storage</button>
+      <button class="filter-btn" data-cat="network">Networking</button>
+      <button class="filter-btn" data-cat="security">Security</button>
+      <button class="filter-btn" data-cat="devops">DevOps</button>
+      <button class="filter-btn" data-cat="cost">Cost & Scale</button>
+    </div>
+    <div class="count-badge" id="countBadge"></div>
+  </div>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Foundational</span>
+  <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Intermediate</span>
+  <span class="legend-item" style="margin-left:.5rem;color:var(--text-dim)">— click any card to open · use the path panel to track progress</span>
+</div>
+
+<div class="no-results" id="noResults">
+  <div class="no-results-title">// NO MATCHES</div>
+  <div class="no-results-sub">Try a different search term or clear the filter.</div>
+</div>
+<div class="grid" id="cardGrid"></div>
+</div><!-- /main -->
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-eyebrow">// Learning Path</div>
+    <div class="sidebar-title">Your Progress</div>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Completion</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-counts" id="progressCounts">0 of 29 concepts visited</div>
+  </div>
+  <div class="sidebar-scroll" id="sidebarScroll"></div>
+</div>
+
+<!-- TOGGLE BUTTON -->
+<button class="sidebar-toggle" id="sidebarToggle">
+  <span class="toggle-progress-pip" id="togglePip">0</span>
+  Learning Path
+</button>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-header">
+      <div class="modal-tags" id="modalTags"></div>
+      <div class="modal-title" id="modalTitle"></div>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-pane="concept">What is it</button>
+      <button class="mode-btn" data-pane="practice">When to use it</button>
+      <button class="mode-btn" data-pane="visual">See it</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-pane active" id="pane-concept"></div>
+      <div class="modal-pane" id="pane-practice"></div>
+      <div class="modal-pane" id="pane-visual"></div>
+    </div>
+    <div class="modal-done-row">
+      <button class="done-btn" id="doneBtn">Mark as done</button>
+      <span class="done-label" id="doneLabel"></span>
+    </div>
+    <div class="modal-nav">
+      <button class="nav-btn" id="prevBtn">← Previous</button>
+      <button class="nav-btn" id="nextBtn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// SVG VISUALS  (one per concept id)
+// ─────────────────────────────────────────────
+const VISUALS = {
+  // VM — hotel room metaphor
+  1:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="20" width="360" height="160" rx="4" fill="#161b22" stroke="#2a3441"/>
+  <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5a6a80" letter-spacing="2">PHYSICAL SERVER</text>
+  <rect x="28" y="38" width="90" height="70" rx="3" fill="#1c2330" stroke="#2a3441"/>
+  <text x="73" y="60" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">VM 1</text>
+  <rect x="33" y="66" width="80" height="8" rx="1" fill="#2a3441"/><rect x="33" y="66" width="55" height="8" rx="1" fill="#38bdf844"/>
+  <text x="73" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">OS + App</text>
+  <rect x="33" y="89" width="80" height="5" rx="1" fill="#2a3441"/><rect x="33" y="89" width="40" height="5" rx="1" fill="#38bdf833"/>
+  <rect x="130" y="38" width="90" height="70" rx="3" fill="#1c2330" stroke="#f0a500"/>
+  <text x="175" y="60" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">VM 2</text>
+  <rect x="135" y="66" width="80" height="8" rx="1" fill="#2a3441"/><rect x="135" y="66" width="65" height="8" rx="1" fill="#f0a50044"/>
+  <text x="175" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">OS + App</text>
+  <rect x="135" y="89" width="80" height="5" rx="1" fill="#2a3441"/><rect x="135" y="89" width="50" height="5" rx="1" fill="#f0a50033"/>
+  <rect x="232" y="38" width="90" height="70" rx="3" fill="#1c2330" stroke="#4ade80"/>
+  <text x="277" y="60" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4ade80">VM 3</text>
+  <rect x="237" y="66" width="80" height="8" rx="1" fill="#2a3441"/><rect x="237" y="66" width="45" height="8" rx="1" fill="#4ade8044"/>
+  <text x="277" y="83" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">OS + App</text>
+  <rect x="237" y="89" width="80" height="5" rx="1" fill="#2a3441"/><rect x="237" y="89" width="60" height="5" rx="1" fill="#4ade8033"/>
+  <rect x="28" y="124" width="332" height="16" rx="2" fill="#1c2330" stroke="#2a3441"/>
+  <text x="194" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Hypervisor — shares physical CPU, RAM, Disk among VMs</text>
+  <rect x="28" y="150" width="332" height="16" rx="2" fill="#161b22" stroke="#2a3441"/>
+  <text x="194" y="161" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Physical Hardware (CPU · RAM · Network · Storage)</text>
+  </svg>`,
+
+  // Serverless — vending machine flow
+  2:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="40" cy="100" r="22" fill="#1c2330" stroke="#2a3441"/>
+  <text x="40" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#cdd5e0">USER</text>
+  <text x="40" y="108" font-family="IBM Plex Mono" font-size="14" text-anchor="middle">👤</text>
+  <line x1="63" y1="100" x2="98" y2="100" stroke="#5a6a80" stroke-dasharray="4 3"/>
+  <text x="80" y="93" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">event</text>
+  <rect x="98" y="72" width="70" height="56" rx="3" fill="#1c2330" stroke="#f0a500"/>
+  <text x="133" y="94" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">TRIGGER</text>
+  <text x="133" y="108" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">HTTP / Queue</text>
+  <text x="133" y="119" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">/ Schedule</text>
+  <line x1="168" y1="100" x2="200" y2="100" stroke="#5a6a80" stroke-dasharray="4 3"/>
+  <text x="184" y="93" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">invoke</text>
+  <rect x="200" y="68" width="80" height="64" rx="3" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="240" y="90" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">FUNCTION</text>
+  <text x="240" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">runs ms–s</text>
+  <text x="240" y="116" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">pay per use</text>
+  <text x="240" y="125" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ auto scales</text>
+  <line x1="280" y1="100" x2="312" y2="100" stroke="#5a6a80" stroke-dasharray="4 3"/>
+  <text x="296" y="93" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">result</text>
+  <circle cx="330" cy="100" r="22" fill="#1c2330" stroke="#4ade80"/>
+  <text x="330" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">OUTPUT</text>
+  <text x="330" y="110" font-family="IBM Plex Mono" font-size="13" text-anchor="middle">✓</text>
+  <text x="190" y="170" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">No server to manage · spins up instantly · cost = $0 when idle</text>
+  </svg>`,
+
+  // Containers — shipping container stacks
+  3:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="80" y="22" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">YOUR LAPTOP</text>
+  <text x="225" y="22" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">CLOUD SERVER</text>
+  <text x="340" y="22" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">ANY CLOUD</text>
+  <g transform="translate(20,30)">
+    <rect width="120" height="44" rx="2" fill="#1c2330" stroke="#f0a500"/>
+    <text x="10" y="16" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">📦 Container</text>
+    <text x="10" y="29" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">App + Dependencies</text>
+    <text x="10" y="40" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">+ Runtime + Config</text>
+  </g>
+  <g transform="translate(20,82)">
+    <rect width="120" height="26" rx="2" fill="#161b22" stroke="#2a3441"/>
+    <text x="10" y="17" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Docker Engine</text>
+  </g>
+  <g transform="translate(20,116)">
+    <rect width="120" height="18" rx="2" fill="#0d1117" stroke="#2a3441"/>
+    <text x="10" y="13" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Your OS</text>
+  </g>
+  <path d="M148 74 L162 74" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="155" y="68" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">same</text>
+  <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#38bdf8"/></marker></defs>
+  <g transform="translate(164,30)">
+    <rect width="120" height="44" rx="2" fill="#1c2330" stroke="#f0a500"/>
+    <text x="10" y="16" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">📦 Container</text>
+    <text x="10" y="29" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">App + Dependencies</text>
+    <text x="10" y="40" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">+ Runtime + Config</text>
+  </g>
+  <g transform="translate(164,82)">
+    <rect width="120" height="26" rx="2" fill="#161b22" stroke="#2a3441"/>
+    <text x="10" y="17" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Docker Engine</text>
+  </g>
+  <g transform="translate(164,116)">
+    <rect width="120" height="18" rx="2" fill="#0d1117" stroke="#2a3441"/>
+    <text x="10" y="13" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Cloud Linux VM</text>
+  </g>
+  <path d="M292 74 L306 74" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <g transform="translate(308,30)">
+    <rect width="60" height="20" rx="2" fill="#1c2330" stroke="#4ade80"/>
+    <text x="30" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">AWS</text>
+  </g>
+  <g transform="translate(308,54)">
+    <rect width="60" height="20" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+    <text x="30" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">AZURE</text>
+  </g>
+  <g transform="translate(308,78)">
+    <rect width="60" height="20" rx="2" fill="#1c2330" stroke="#f87171"/>
+    <text x="30" y="13" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">GCP</text>
+  </g>
+  <text x="190" y="165" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">Same container image · runs identically everywhere</text>
+  </svg>`,
+
+  // Kubernetes — cluster diagram
+  4:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="360" height="175" rx="4" fill="#0d1117" stroke="#2a3441"/>
+  <text x="190" y="26" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="2">KUBERNETES CLUSTER</text>
+  <rect x="25" y="32" width="330" height="42" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="35" y="46" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">Control Plane</text>
+  <rect x="35" y="52" width="60" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="65" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Scheduler</text>
+  <rect x="102" y="52" width="60" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="132" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">API Server</text>
+  <rect x="169" y="52" width="70" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="204" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">etcd (state)</text>
+  <line x1="190" y1="74" x2="80" y2="88" stroke="#2a3441" stroke-dasharray="3 2"/>
+  <line x1="190" y1="74" x2="190" y2="88" stroke="#2a3441" stroke-dasharray="3 2"/>
+  <line x1="190" y1="74" x2="300" y2="88" stroke="#2a3441" stroke-dasharray="3 2"/>
+  <rect x="25" y="88" width="100" height="80" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="75" y="101" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Node 1</text>
+  <rect x="32" y="107" width="85" height="18" rx="1" fill="#1c2330" stroke="#f0a500"/>
+  <text x="74" y="119" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">📦 Pod</text>
+  <rect x="32" y="130" width="85" height="18" rx="1" fill="#1c2330" stroke="#f0a500"/>
+  <text x="74" y="142" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">📦 Pod</text>
+  <rect x="140" y="88" width="100" height="80" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="190" y="101" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Node 2</text>
+  <rect x="147" y="107" width="85" height="18" rx="1" fill="#1c2330" stroke="#f0a500"/>
+  <text x="189" y="119" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">📦 Pod</text>
+  <rect x="147" y="130" width="85" height="18" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="189" y="142" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">📦 New Pod ↑</text>
+  <rect x="255" y="88" width="100" height="80" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="305" y="101" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Node 3</text>
+  <rect x="262" y="107" width="85" height="18" rx="1" fill="#1c2330" stroke="#f0a500"/>
+  <text x="304" y="119" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">📦 Pod</text>
+  <rect x="262" y="130" width="85" height="18" rx="1" fill="#1c2330" stroke="#f87171" stroke-dasharray="3 2"/>
+  <text x="304" y="142" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">💥 Crashed</text>
+  </svg>`,
+
+  // Edge Computing — geography diagram
+  5:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="155" y="80" width="70" height="50" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="190" y="98" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">ORIGIN</text>
+  <text x="190" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Data Center</text>
+  <text x="190" y="122" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">US East</text>
+  <circle cx="50" cy="60" r="18" fill="#1c2330" stroke="#f0a500"/>
+  <text x="50" y="57" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="50" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">London</text>
+  <circle cx="50" cy="140" r="18" fill="#1c2330" stroke="#f0a500"/>
+  <text x="50" y="137" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="50" y="147" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">São Paulo</text>
+  <circle cx="330" cy="60" r="18" fill="#1c2330" stroke="#f0a500"/>
+  <text x="330" y="57" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="330" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">Tokyo</text>
+  <circle cx="330" cy="140" r="18" fill="#1c2330" stroke="#f0a500"/>
+  <text x="330" y="137" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="330" y="147" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">Sydney</text>
+  <line x1="68" y1="67" x2="155" y2="95" stroke="#2a3441" stroke-dasharray="3 3"/>
+  <line x1="68" y1="133" x2="155" y2="115" stroke="#2a3441" stroke-dasharray="3 3"/>
+  <line x1="312" y1="67" x2="225" y2="95" stroke="#2a3441" stroke-dasharray="3 3"/>
+  <line x1="312" y1="133" x2="225" y2="115" stroke="#2a3441" stroke-dasharray="3 3"/>
+  <circle cx="50" cy="35" r="8" fill="#1c2330" stroke="#4ade80"/>
+  <text x="50" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">👤</text>
+  <line x1="50" y1="43" x2="50" y2="42" stroke="#4ade80"/>
+  <text x="20" y="28" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">~10ms</text>
+  <circle cx="280" cy="175" r="8" fill="#1c2330" stroke="#f87171"/>
+  <text x="280" y="178" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">👤</text>
+  <line x1="280" y1="167" x2="225" y2="122" stroke="#f87171" stroke-dasharray="2 2"/>
+  <text x="240" y="162" font-family="IBM Plex Mono" font-size="6" fill="#f87171">~180ms (no edge)</text>
+  <text x="190" y="190" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Edge nodes serve cached/processed content from nearby — dramatically faster</text>
+  </svg>`,
+
+  // Spot instances — cost vs risk chart
+  6:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5a6a80" letter-spacing="1">ON-DEMAND vs SPOT PRICING</text>
+  <rect x="40" y="30" width="140" height="110" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="110" y="47" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#cdd5e0">On-Demand</text>
+  <rect x="52" y="54" width="116" height="24" rx="2" fill="#1c2330"/>
+  <rect x="52" y="54" width="116" height="24" rx="2" fill="#f0a50033"/>
+  <text x="110" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#f0a500">$$$</text>
+  <text x="110" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Always available</text>
+  <text x="110" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ No interruptions</text>
+  <text x="110" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ For production</text>
+  <rect x="200" y="30" width="140" height="110" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="270" y="47" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">Spot / Preemptible</text>
+  <rect x="212" y="54" width="116" height="24" rx="2" fill="#1c2330"/>
+  <rect x="212" y="54" width="35" height="24" rx="2" fill="#4ade8033"/>
+  <text x="270" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#4ade80">$</text>
+  <text x="270" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Up to 90% cheaper</text>
+  <text x="270" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">✗ Can be interrupted</text>
+  <text x="270" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Batch / ML / CI</text>
+  <text x="190" y="160" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Best for: overnight data jobs · video encoding · test pipelines</text>
+  <text x="190" y="175" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Not for: databases · user-facing services · anything stateful</text>
+  </svg>`,
+
+  // Object Storage — warehouse locker concept
+  7:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="100" r="22" fill="#1c2330" stroke="#2a3441"/>
+  <text x="50" y="97" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#cdd5e0">YOU</text>
+  <text x="50" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="10">👤</text>
+  <path d="M72 100 L100 100" stroke="#5a6a80" stroke-dasharray="4 3" marker-end="url(#arr2)"/>
+  <defs><marker id="arr2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5a6a80"/></marker></defs>
+  <text x="86" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">upload</text>
+  <rect x="100" y="40" width="180" height="120" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="190" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">OBJECT STORAGE BUCKET</text>
+  <rect x="112" y="62" width="70" height="28" rx="2" fill="#1c2330" stroke="#2a3441"/>
+  <text x="147" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">🖼 image.jpg</text>
+  <text x="147" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">4.2 MB</text>
+  <rect x="196" y="62" width="70" height="28" rx="2" fill="#1c2330" stroke="#2a3441"/>
+  <text x="231" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">📄 report.pdf</text>
+  <text x="231" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">1.1 MB</text>
+  <rect x="112" y="96" width="70" height="28" rx="2" fill="#1c2330" stroke="#2a3441"/>
+  <text x="147" y="108" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">🎬 video.mp4</text>
+  <text x="147" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">240 MB</text>
+  <rect x="196" y="96" width="70" height="28" rx="2" fill="#1c2330" stroke="#2a3441"/>
+  <text x="231" y="108" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">💾 backup.zip</text>
+  <text x="231" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">890 MB</text>
+  <text x="190" y="148" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">each object gets a unique URL</text>
+  <path d="M280 100 L308 100" stroke="#5a6a80" stroke-dasharray="4 3" marker-end="url(#arr2)"/>
+  <text x="294" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">URL</text>
+  <circle cx="328" cy="100" r="22" fill="#1c2330" stroke="#4ade80"/>
+  <text x="328" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">ANYONE</text>
+  <text x="328" y="108" text-anchor="middle" font-family="IBM Plex Mono" font-size="8">🌍</text>
+  <text x="190" y="175" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Infinite scale · ~$0.023/GB/month · accessible via any internet connection</text>
+  </svg>`,
+
+  // Block Storage — hard drive attached
+  8:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="40" y="50" width="120" height="100" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="100" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">VIRTUAL</text>
+  <text x="100" y="82" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">MACHINE</text>
+  <rect x="52" y="90" width="96" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="100" y="101" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">CPU + RAM</text>
+  <rect x="52" y="108" width="96" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="100" y="119" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Network</text>
+  <line x1="160" y1="100" x2="190" y2="100" stroke="#f0a500" stroke-width="2"/>
+  <text x="175" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">mounted</text>
+  <rect x="190" y="50" width="110" height="100" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="245" y="68" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">BLOCK</text>
+  <text x="245" y="80" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">STORAGE</text>
+  <rect x="202" y="88" width="86" height="10" rx="1" fill="#f0a50022" stroke="#f0a50055"/>
+  <rect x="202" y="102" width="86" height="10" rx="1" fill="#f0a50022" stroke="#f0a50055"/>
+  <rect x="202" y="116" width="86" height="10" rx="1" fill="#f0a50022" stroke="#f0a50055"/>
+  <rect x="202" y="130" width="86" height="10" rx="1" fill="#f0a50022" stroke="#f0a50055"/>
+  <text x="245" y="155" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">raw blocks (fast R/W)</text>
+  <rect x="318" y="65" width="48" height="30" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="342" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">DB</text>
+  <text x="342" y="89" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">reads</text>
+  <line x1="300" y1="88" x2="318" y2="82" stroke="#4ade80" stroke-dasharray="3 2"/>
+  <text x="190" y="175" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Like a hard drive directly attached — fast, low-latency, for databases &amp; OS</text>
+  </svg>`,
+
+  // Managed DB — landlord metaphor
+  9:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="30" width="155" height="140" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="97" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">SELF-MANAGED</text>
+  <rect x="32" y="58" width="131" height="14" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="69" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Install database</text>
+  <rect x="32" y="76" width="131" height="14" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="87" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Patch OS + DB versions</text>
+  <rect x="32" y="94" width="131" height="14" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Configure backups</text>
+  <rect x="32" y="112" width="131" height="14" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="123" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Handle failover</text>
+  <rect x="32" y="130" width="131" height="14" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="141" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Scale manually</text>
+  <text x="97" y="162" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80">You do everything</text>
+  <rect x="205" y="30" width="155" height="140" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="282" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">MANAGED DATABASE</text>
+  <rect x="217" y="58" width="131" height="14" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="282" y="69" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Auto-installed</text>
+  <rect x="217" y="76" width="131" height="14" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="282" y="87" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Auto-patched</text>
+  <rect x="217" y="94" width="131" height="14" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="282" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Daily auto-backups</text>
+  <rect x="217" y="112" width="131" height="14" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="282" y="123" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Auto-failover</text>
+  <rect x="217" y="130" width="131" height="14" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="282" y="141" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ One-click scaling</text>
+  <text x="282" y="162" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">Cloud handles it all</text>
+  </svg>`,
+
+  // Data Warehouse — OLTP vs OLAP
+  10:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#5a6a80" letter-spacing="1">DATABASE vs DATA WAREHOUSE</text>
+  <rect x="20" y="28" width="155" height="130" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="97" y="46" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">DATABASE (OLTP)</text>
+  <text x="97" y="60" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Optimized for transactions</text>
+  <rect x="32" y="68" width="131" height="12" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="97" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">SELECT * WHERE id=42</text>
+  <rect x="32" y="84" width="131" height="12" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="97" y="94" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">INSERT INTO orders...</text>
+  <rect x="32" y="100" width="131" height="12" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="97" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">UPDATE user SET...</text>
+  <text x="97" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">ms response time</text>
+  <text x="97" y="141" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">GBs of current data</text>
+  <text x="97" y="152" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Real-time writes</text>
+  <rect x="205" y="28" width="155" height="130" rx="3" fill="#161b22" stroke="#a78bfa"/>
+  <text x="282" y="46" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#a78bfa">WAREHOUSE (OLAP)</text>
+  <text x="282" y="60" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Optimized for analysis</text>
+  <rect x="217" y="68" width="131" height="20" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="282" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">SELECT region, SUM(revenue)</text>
+  <text x="282" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">GROUP BY region, quarter</text>
+  <text x="282" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">seconds–minutes OK</text>
+  <text x="282" y="123" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">TBs–PBs of history</text>
+  <text x="282" y="136" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Batch writes, read-heavy</text>
+  <text x="282" y="149" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#a78bfa">→ Powers BI dashboards</text>
+  </svg>`,
+
+  // Caching — bartender memory
+  11:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="80" r="22" fill="#1c2330" stroke="#2a3441"/>
+  <text x="50" y="77" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">APP</text>
+  <text x="50" y="89" text-anchor="middle" font-family="IBM Plex Mono" font-size="8">⚙️</text>
+  <path d="M72 72 L108 58" stroke="#f0a500" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <defs><marker id="arr3" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#f0a500"/></marker></defs>
+  <text x="90" y="56" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">1. check cache</text>
+  <rect x="108" y="34" width="100" height="56" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="158" y="52" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">CACHE</text>
+  <text x="158" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Redis / Memcached</text>
+  <text x="158" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">RAM · &lt;1ms</text>
+  <path d="M208 56 L238 80" stroke="#4ade80" stroke-dasharray="3 2" marker-end="url(#arr4)"/>
+  <defs><marker id="arr4" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker></defs>
+  <text x="224" y="60" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">HIT → instant</text>
+  <path d="M72 88 L108 115" stroke="#5a6a80" stroke-dasharray="3 2" marker-end="url(#arr5)"/>
+  <defs><marker id="arr5" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5a6a80"/></marker></defs>
+  <text x="62" y="110" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">2. miss →</text>
+  <text x="62" y="120" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">query DB</text>
+  <rect x="108" y="115" width="100" height="50" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="158" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#cdd5e0">DATABASE</text>
+  <text x="158" y="148" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Disk · 10–100ms</text>
+  <path d="M208 140 L260 140" stroke="#5a6a80" stroke-dasharray="3 2" marker-end="url(#arr5)"/>
+  <text x="234" y="134" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">3. store in cache</text>
+  <rect x="260" y="115" width="100" height="50" rx="3" fill="#1c2330" stroke="#f0a500" stroke-dasharray="3 2"/>
+  <text x="310" y="135" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">Cached!</text>
+  <text x="310" y="148" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">next request: fast</text>
+  </svg>`,
+
+  // CDN — globe with edge nodes
+  12:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="155" y="80" width="70" height="40" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="190" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">ORIGIN</text>
+  <text x="190" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Server · US</text>
+  <circle cx="60" cy="50" r="22" fill="#1c2330" stroke="#f0a500"/>
+  <text x="60" y="47" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="60" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">Europe</text>
+  <circle cx="60" cy="150" r="22" fill="#1c2330" stroke="#f0a500"/>
+  <text x="60" y="147" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="60" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">S. America</text>
+  <circle cx="320" cy="50" r="22" fill="#1c2330" stroke="#f0a500"/>
+  <text x="320" y="47" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="320" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">Asia</text>
+  <circle cx="320" cy="150" r="22" fill="#1c2330" stroke="#f0a500"/>
+  <text x="320" y="147" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">EDGE</text>
+  <text x="320" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">Australia</text>
+  <line x1="78" y1="57" x2="155" y2="88" stroke="#2a3441" stroke-dasharray="4 3"/>
+  <line x1="78" y1="143" x2="155" y2="112" stroke="#2a3441" stroke-dasharray="4 3"/>
+  <line x1="302" y1="57" x2="225" y2="88" stroke="#2a3441" stroke-dasharray="4 3"/>
+  <line x1="302" y1="143" x2="225" y2="112" stroke="#2a3441" stroke-dasharray="4 3"/>
+  <circle cx="36" cy="32" r="8" fill="#1c2330" stroke="#4ade80"/>
+  <text x="36" y="35" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">👤</text>
+  <line x1="38" y1="40" x2="43" y2="44" stroke="#4ade80" stroke-width="1.5"/>
+  <text x="15" y="22" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">~8ms ✓</text>
+  <circle cx="190" cy="178" r="8" fill="#1c2330" stroke="#f87171"/>
+  <text x="190" y="181" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">👤</text>
+  <line x1="190" y1="170" x2="190" y2="120" stroke="#f87171" stroke-dasharray="2 2"/>
+  <text x="218" y="155" font-family="IBM Plex Mono" font-size="6" fill="#f87171">200ms (no CDN)</text>
+  </svg>`,
+
+  // Load Balancer — traffic distribution
+  13:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="60" r="14" fill="#1c2330" stroke="#2a3441"/>
+  <text x="50" y="63" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">👤</text>
+  <circle cx="50" cy="100" r="14" fill="#1c2330" stroke="#2a3441"/>
+  <text x="50" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">👤</text>
+  <circle cx="50" cy="140" r="14" fill="#1c2330" stroke="#2a3441"/>
+  <text x="50" y="143" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">👤</text>
+  <line x1="64" y1="60" x2="120" y2="95" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="64" y1="100" x2="120" y2="100" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="64" y1="140" x2="120" y2="105" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <rect x="120" y="75" width="70" height="50" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="155" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">LOAD</text>
+  <text x="155" y="107" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">BALANCER</text>
+  <line x1="190" y1="90" x2="240" y2="60" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="190" y1="100" x2="240" y2="100" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="190" y1="110" x2="240" y2="140" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <rect x="240" y="42" width="90" height="34" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="285" y="57" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">Server A</text>
+  <text x="285" y="69" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">33% load</text>
+  <rect x="240" y="83" width="90" height="34" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="285" y="98" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">Server B</text>
+  <text x="285" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">33% load</text>
+  <rect x="240" y="124" width="90" height="34" rx="2" fill="#1c2330" stroke="#f87171" stroke-dasharray="3 2"/>
+  <text x="285" y="139" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Server C</text>
+  <text x="285" y="151" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f87171">unhealthy — skipped</text>
+  <text x="190" y="185" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Distributes traffic evenly · skips unhealthy servers automatically</text>
+  </svg>`,
+
+  // VPC — network isolation
+  14:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="360" height="175" rx="6" fill="#0d1117" stroke="#2a3441" stroke-dasharray="6 3"/>
+  <text x="190" y="26" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="2">CLOUD PROVIDER</text>
+  <rect x="24" y="34" width="332" height="140" rx="4" fill="#161b22" stroke="#a78bfa"/>
+  <text x="190" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#a78bfa">YOUR VPC (private network)</text>
+  <rect x="36" y="58" width="140" height="100" rx="3" fill="#0d1117" stroke="#38bdf8"/>
+  <text x="106" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">Public Subnet</text>
+  <rect x="48" y="80" width="116" height="28" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="106" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">🌐 Web Server</text>
+  <text x="106" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">internet-facing</text>
+  <rect x="48" y="116" width="116" height="28" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="106" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">⚖️ Load Balancer</text>
+  <text x="106" y="139" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">internet-facing</text>
+  <rect x="204" y="58" width="140" height="100" rx="3" fill="#0d1117" stroke="#f87171"/>
+  <text x="274" y="74" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Private Subnet</text>
+  <rect x="216" y="80" width="116" height="28" rx="2" fill="#1c2330" stroke="#f87171"/>
+  <text x="274" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">🗄 Database</text>
+  <text x="274" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">no internet access</text>
+  <rect x="216" y="116" width="116" height="28" rx="2" fill="#1c2330" stroke="#f87171"/>
+  <text x="274" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">🔐 Secrets Store</text>
+  <text x="274" y="139" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">internal only</text>
+  <line x1="176" y1="100" x2="204" y2="100" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <text x="190" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">internal</text>
+  </svg>`,
+
+  // DNS — phonebook lookup
+  15:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="40" cy="100" r="22" fill="#1c2330" stroke="#2a3441"/>
+  <text x="40" y="97" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#cdd5e0">YOU</text>
+  <text x="40" y="110" text-anchor="middle" font-family="IBM Plex Mono" font-size="10">👤</text>
+  <text x="40" y="136" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">type:</text>
+  <text x="40" y="147" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">mysite.com</text>
+  <path d="M62 90 L110 70" stroke="#5a6a80" stroke-dasharray="3 2" marker-end="url(#arr6)"/>
+  <defs><marker id="arr6" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5a6a80"/></marker></defs>
+  <text x="86" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">1. lookup</text>
+  <rect x="110" y="48" width="100" height="50" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="160" y="66" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">DNS</text>
+  <text x="160" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">mysite.com →</text>
+  <text x="160" y="89" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">52.14.22.101</text>
+  <path d="M160 98 L160 120" stroke="#f0a500" stroke-dasharray="3 2" marker-end="url(#arr6)"/>
+  <text x="174" y="112" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">2. returns IP</text>
+  <path d="M62 110 L240 138" stroke="#4ade80" stroke-dasharray="3 2" marker-end="url(#arr7)"/>
+  <defs><marker id="arr7" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker></defs>
+  <text x="140" y="133" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">3. browser connects to server</text>
+  <rect x="240" y="120" width="110" height="50" rx="3" fill="#161b22" stroke="#4ade80"/>
+  <text x="295" y="138" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">YOUR SERVER</text>
+  <text x="295" y="151" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">52.14.22.101</text>
+  <text x="295" y="163" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">mysite.com ✓</text>
+  </svg>`,
+
+  // API Gateway — hotel front desk
+  16:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="35" cy="65" r="16" fill="#1c2330" stroke="#2a3441"/>
+  <text x="35" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Mobile</text>
+  <text x="35" y="73" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">📱</text>
+  <circle cx="35" cy="105" r="16" fill="#1c2330" stroke="#2a3441"/>
+  <text x="35" y="102" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Web</text>
+  <text x="35" y="113" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">💻</text>
+  <circle cx="35" cy="145" r="16" fill="#1c2330" stroke="#2a3441"/>
+  <text x="35" y="142" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Partner</text>
+  <text x="35" y="153" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">🤝</text>
+  <line x1="51" y1="70" x2="100" y2="90" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="51" y1="105" x2="100" y2="105" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="51" y1="140" x2="100" y2="120" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <rect x="100" y="72" width="90" height="66" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="145" y="90" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">API</text>
+  <text x="145" y="102" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">GATEWAY</text>
+  <text x="145" y="115" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">auth · rate limit</text>
+  <text x="145" y="126" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">logging · routing</text>
+  <line x1="190" y1="90" x2="240" y2="65" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="190" y1="100" x2="240" y2="100" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="190" y1="112" x2="240" y2="135" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <rect x="240" y="48" width="110" height="24" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="295" y="63" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">Users Service</text>
+  <rect x="240" y="88" width="110" height="24" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="295" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">Orders Service</text>
+  <rect x="240" y="128" width="110" height="24" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="295" y="143" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">Payments Service</text>
+  <text x="190" y="178" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">One entry point · hides internal complexity · handles cross-cutting concerns</text>
+  </svg>`,
+
+  // IAM — key card metaphor
+  17:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="16" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">WHO CAN DO WHAT ON WHICH RESOURCE</text>
+  <rect x="20" y="26" width="80" height="150" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="60" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">IDENTITIES</text>
+  <rect x="28" y="50" width="64" height="18" rx="1" fill="#1c2330" stroke="#f0a500"/>
+  <text x="60" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">👤 Dev Team</text>
+  <rect x="28" y="72" width="64" height="18" rx="1" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="60" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">👤 Analyst</text>
+  <rect x="28" y="94" width="64" height="18" rx="1" fill="#1c2330" stroke="#a78bfa"/>
+  <text x="60" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#a78bfa">⚙ App</text>
+  <rect x="28" y="116" width="64" height="18" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="60" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">👤 Admin</text>
+  <rect x="150" y="26" width="80" height="150" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="190" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">PERMISSIONS</text>
+  <rect x="158" y="50" width="64" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="190" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Read</text>
+  <rect x="158" y="72" width="64" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="190" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Write</text>
+  <rect x="158" y="94" width="64" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="190" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Delete</text>
+  <rect x="158" y="116" width="64" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="190" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Admin</text>
+  <rect x="280" y="26" width="85" height="150" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <text x="322" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">RESOURCES</text>
+  <rect x="288" y="50" width="69" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="322" y="62" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">S3 Buckets</text>
+  <rect x="288" y="72" width="69" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="322" y="84" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Databases</text>
+  <rect x="288" y="94" width="69" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="322" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">VMs</text>
+  <rect x="288" y="116" width="69" height="18" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="322" y="128" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#cdd5e0">Functions</text>
+  <line x1="100" y1="59" x2="150" y2="59" stroke="#f0a500" stroke-width="1"/>
+  <line x1="100" y1="81" x2="150" y2="73" stroke="#38bdf8" stroke-width="1"/>
+  <line x1="100" y1="103" x2="150" y2="59" stroke="#a78bfa" stroke-width="1"/>
+  <line x1="100" y1="125" x2="150" y2="59" stroke="#4ade80" stroke-width="1"/>
+  <line x1="100" y1="125" x2="150" y2="73" stroke="#4ade80" stroke-width="1"/>
+  <line x1="100" y1="125" x2="150" y2="95" stroke="#4ade80" stroke-width="1"/>
+  <line x1="100" y1="125" x2="150" y2="125" stroke="#4ade80" stroke-width="1"/>
+  <line x1="230" y1="59" x2="280" y2="59" stroke="#f0a500" stroke-width="1"/>
+  <line x1="230" y1="73" x2="280" y2="81" stroke="#38bdf8" stroke-width="1"/>
+  <line x1="230" y1="59" x2="280" y2="59" stroke="#a78bfa" stroke-width="1"/>
+  </svg>`,
+
+  // Encryption — safe and envelope
+  18:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="30" width="155" height="130" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="97" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">ENCRYPTION AT REST</text>
+  <text x="97" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Data stored on disk</text>
+  <rect x="42" y="76" width="110" height="50" rx="3" fill="#1c2330" stroke="#f0a500"/>
+  <text x="97" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="18">🔒</text>
+  <text x="97" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Scrambled on disk</text>
+  <text x="97" y="143" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Keys managed by KMS</text>
+  <text x="97" y="155" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Stolen disk = useless</text>
+  <rect x="205" y="30" width="155" height="130" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="282" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">ENCRYPTION IN TRANSIT</text>
+  <text x="282" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Data moving over network</text>
+  <rect x="217" y="72" width="130" height="28" rx="2" fill="#1c2330" stroke="#2a3441"/>
+  <text x="222" y="85" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">https://</text>
+  <text x="222" y="95" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">mysite.com/login</text>
+  <text x="282" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="18">✉️</text>
+  <text x="282" y="140" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">TLS encrypts the packet</text>
+  <text x="282" y="152" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Intercept = gibberish</text>
+  </svg>`,
+
+  // Secrets Management — vault vs bad practices
+  19:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="155" height="155" rx="3" fill="#161b22" stroke="#f87171"/>
+  <text x="97" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f87171">❌ BAD PRACTICES</text>
+  <rect x="32" y="50" width="131" height="22" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="60" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f87171">password="abc123" in code</text>
+  <text x="97" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">hardcoded → visible in Git</text>
+  <rect x="32" y="78" width="131" height="22" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="88" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f87171">DB_PASS=secret in .env file</text>
+  <text x="97" y="98" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">accidentally committed</text>
+  <rect x="32" y="106" width="131" height="22" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="97" y="116" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f87171">API key in Slack message</text>
+  <text x="97" y="126" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">logs = permanent exposure</text>
+  <rect x="205" y="20" width="155" height="155" rx="3" fill="#161b22" stroke="#4ade80"/>
+  <text x="282" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4ade80">✓ SECRETS MANAGER</text>
+  <rect x="232" y="50" width="100" height="60" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="282" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="24">🔐</text>
+  <text x="282" y="95" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">Encrypted vault</text>
+  <text x="282" y="105" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">access-controlled</text>
+  <rect x="217" y="120" width="131" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="282" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">App fetches at runtime only</text>
+  <rect x="217" y="138" width="131" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="282" y="148" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">Auto-rotation built in</text>
+  <rect x="217" y="156" width="131" height="14" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="282" y="166" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">Full audit log of access</text>
+  </svg>`,
+
+  // DDoS — bouncer analogy
+  20:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="15" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">DDOS ATTACK → PROTECTION → YOUR SERVICE</text>
+  <circle cx="34" cy="60" r="10" fill="#f8717122" stroke="#f87171"/>
+  <text x="34" y="63" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">🤖</text>
+  <circle cx="34" cy="85" r="10" fill="#f8717122" stroke="#f87171"/>
+  <text x="34" y="88" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">🤖</text>
+  <circle cx="34" cy="110" r="10" fill="#f8717122" stroke="#f87171"/>
+  <text x="34" y="113" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">🤖</text>
+  <circle cx="34" cy="135" r="10" fill="#f8717122" stroke="#f87171"/>
+  <text x="34" y="138" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">🤖</text>
+  <text x="34" y="158" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f87171">Bots</text>
+  <line x1="44" y1="70" x2="100" y2="90" stroke="#f87171" stroke-dasharray="2 2"/>
+  <line x1="44" y1="90" x2="100" y2="96" stroke="#f87171" stroke-dasharray="2 2"/>
+  <line x1="44" y1="110" x2="100" y2="102" stroke="#f87171" stroke-dasharray="2 2"/>
+  <line x1="44" y1="130" x2="100" y2="108" stroke="#f87171" stroke-dasharray="2 2"/>
+  <circle cx="68" cy="100" r="12" fill="#1c2330" stroke="#4ade80"/>
+  <text x="68" y="103" text-anchor="middle" font-family="IBM Plex Mono" font-size="9">👤</text>
+  <line x1="80" y1="100" x2="100" y2="100" stroke="#4ade80" stroke-width="1.5"/>
+  <text x="68" y="122" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">real user</text>
+  <rect x="100" y="74" width="90" height="52" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="145" y="94" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">DDoS</text>
+  <text x="145" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f0a500">Shield</text>
+  <text x="145" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">traffic analysis</text>
+  <line x1="108" y1="90" x2="108" y2="165" stroke="#f87171" stroke-dasharray="2 2"/>
+  <text x="75" y="172" font-family="IBM Plex Mono" font-size="6" fill="#f87171">bots blocked ✗</text>
+  <line x1="190" y1="100" x2="240" y2="100" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arr8)"/>
+  <defs><marker id="arr8" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker></defs>
+  <text x="215" y="92" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">real users pass</text>
+  <rect x="240" y="74" width="110" height="52" rx="3" fill="#161b22" stroke="#4ade80"/>
+  <text x="295" y="94" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4ade80">YOUR</text>
+  <text x="295" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4ade80">SERVICE</text>
+  <text x="295" y="118" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">stays online ✓</text>
+  </svg>`,
+
+  // IaC — recipe metaphor
+  21:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="20" width="155" height="155" rx="3" fill="#161b22" stroke="#f87171"/>
+  <text x="97" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#f87171">Manual Clicks</text>
+  <text x="97" y="72" text-anchor="middle" font-family="IBM Plex Mono" font-size="32">🖱️</text>
+  <text x="97" y="102" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">✗ Not reproducible</text>
+  <text x="97" y="116" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">✗ No history/audit</text>
+  <text x="97" y="130" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">✗ Different each time</text>
+  <text x="97" y="144" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">✗ Hard to share</text>
+  <text x="97" y="164" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">cooking from memory</text>
+  <rect x="205" y="20" width="155" height="155" rx="3" fill="#161b22" stroke="#4ade80"/>
+  <text x="282" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4ade80">Infrastructure as Code</text>
+  <rect x="217" y="48" width="131" height="72" rx="2" fill="#0d1117" stroke="#2a3441"/>
+  <text x="225" y="64" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">resource "aws_instance" {</text>
+  <text x="230" y="76" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">  ami   = "ami-abc"</text>
+  <text x="230" y="88" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">  type  = "t3.micro"</text>
+  <text x="225" y="100" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">}</text>
+  <text x="282" y="138" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Version controlled</text>
+  <text x="282" y="150" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Reproducible</text>
+  <text x="282" y="162" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">✓ Reviewable</text>
+  </svg>`,
+
+  // Terraform — universal remote
+  22:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="130" y="20" width="120" height="130" rx="4" fill="#161b22" stroke="#a78bfa"/>
+  <text x="190" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#a78bfa">TERRAFORM</text>
+  <rect x="142" y="52" width="96" height="18" rx="2" fill="#0d1117" stroke="#2a3441"/>
+  <text x="190" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">terraform plan</text>
+  <rect x="142" y="74" width="96" height="18" rx="2" fill="#0d1117" stroke="#2a3441"/>
+  <text x="190" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">terraform apply</text>
+  <rect x="142" y="96" width="96" height="18" rx="2" fill="#0d1117" stroke="#2a3441"/>
+  <text x="190" y="108" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">terraform destroy</text>
+  <text x="190" y="132" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">HCL language</text>
+  <text x="190" y="143" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">cloud-agnostic</text>
+  <path d="M130 80 L80 60" stroke="#a78bfa" stroke-dasharray="4 2" marker-end="url(#arr9)"/>
+  <defs><marker id="arr9" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a78bfa"/></marker></defs>
+  <rect x="20" y="40" width="60" height="38" rx="2" fill="#1c2330" stroke="#f59e0b"/>
+  <text x="50" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f59e0b">AWS</text>
+  <text x="50" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">EC2, S3, RDS</text>
+  <path d="M130 90 L80 100" stroke="#a78bfa" stroke-dasharray="4 2" marker-end="url(#arr9)"/>
+  <rect x="20" y="82" width="60" height="38" rx="2" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="50" y="100" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">AZURE</text>
+  <text x="50" y="112" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">VMs, Blobs</text>
+  <path d="M130 108 L80 140" stroke="#a78bfa" stroke-dasharray="4 2" marker-end="url(#arr9)"/>
+  <rect x="20" y="122" width="60" height="38" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="50" y="140" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">GCP</text>
+  <text x="50" y="152" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">GKE, BigQuery</text>
+  <path d="M250 80 L300 60" stroke="#a78bfa" stroke-dasharray="4 2" marker-end="url(#arr9)"/>
+  <rect x="300" y="40" width="65" height="38" rx="2" fill="#1c2330" stroke="#5a6a80"/>
+  <text x="332" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">GitHub</text>
+  <text x="332" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Cloudflare</text>
+  <path d="M250 100 L300 115" stroke="#a78bfa" stroke-dasharray="4 2" marker-end="url(#arr9)"/>
+  <rect x="300" y="96" width="65" height="38" rx="2" fill="#1c2330" stroke="#5a6a80"/>
+  <text x="332" y="114" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Datadog</text>
+  <text x="332" y="126" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">+ 1000 more</text>
+  <text x="190" y="172" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">One tool · one workflow · any cloud or service</text>
+  </svg>`,
+
+  // CI/CD — assembly line
+  23:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="15" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">CODE → PIPELINE → PRODUCTION</text>
+  <rect x="10" y="28" width="60" height="50" rx="2" fill="#161b22" stroke="#2a3441"/>
+  <text x="40" y="46" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">Dev</text>
+  <text x="40" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">writes</text>
+  <text x="40" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">code</text>
+  <path d="M70 53 L90 53" stroke="#5a6a80" marker-end="url(#pa)"/>
+  <defs><marker id="pa" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#5a6a80"/></marker></defs>
+  <rect x="90" y="28" width="60" height="50" rx="2" fill="#161b22" stroke="#38bdf8"/>
+  <text x="120" y="44" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">CI</text>
+  <text x="120" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Build</text>
+  <text x="120" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Test</text>
+  <text x="120" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">✓ lint</text>
+  <path d="M150 53 L170 53" stroke="#5a6a80" marker-end="url(#pa)"/>
+  <rect x="170" y="28" width="60" height="50" rx="2" fill="#161b22" stroke="#a78bfa"/>
+  <text x="200" y="44" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#a78bfa">Staging</text>
+  <text x="200" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Deploy</text>
+  <text x="200" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">to test</text>
+  <text x="200" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">✓ e2e tests</text>
+  <path d="M230 53 L250 53" stroke="#5a6a80" marker-end="url(#pa)"/>
+  <rect x="250" y="28" width="60" height="50" rx="2" fill="#161b22" stroke="#4ade80"/>
+  <text x="280" y="44" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">CD</text>
+  <text x="280" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Deploy</text>
+  <text x="280" y="67" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">to prod</text>
+  <text x="280" y="78" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">auto 🚀</text>
+  <path d="M310 53 L330 53" stroke="#4ade80" marker-end="url(#pa2)"/>
+  <defs><marker id="pa2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker></defs>
+  <rect x="330" y="28" width="42" height="50" rx="2" fill="#161b22" stroke="#4ade80"/>
+  <text x="351" y="48" text-anchor="middle" font-family="IBM Plex Mono" font-size="14">🌍</text>
+  <text x="351" y="65" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">Users</text>
+  <text x="351" y="76" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">get it</text>
+  <rect x="170" y="100" width="60" height="30" rx="2" fill="#1c2330" stroke="#f87171"/>
+  <text x="200" y="114" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Test fails</text>
+  <text x="200" y="124" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">→ blocked</text>
+  <path d="M200 78 L200 100" stroke="#f87171" stroke-dasharray="3 2"/>
+  <text x="190" y="160" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Every merge triggers the pipeline · humans only write code · machines do the rest</text>
+  </svg>`,
+
+  // Monitoring — dashboard
+  24:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="360" height="175" rx="4" fill="#0d1117" stroke="#2a3441"/>
+  <text x="190" y="26" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="2">OBSERVABILITY DASHBOARD</text>
+  <rect x="20" y="34" width="100" height="60" rx="2" fill="#161b22" stroke="#4ade80"/>
+  <text x="70" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">Uptime</text>
+  <text x="70" y="68" text-anchor="middle" font-family="IBM Plex Mono" font-size="18" fill="#4ade80">99.9%</text>
+  <text x="70" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">last 30 days</text>
+  <rect x="130" y="34" width="110" height="60" rx="2" fill="#161b22" stroke="#f0a500"/>
+  <text x="185" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">Response Time</text>
+  <polyline points="140,85 155,75 170,80 185,60 200,65 215,55 230,70" stroke="#f0a500" stroke-width="1.5" fill="none"/>
+  <text x="185" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">avg 142ms</text>
+  <rect x="250" y="34" width="110" height="60" rx="2" fill="#161b22" stroke="#f87171"/>
+  <text x="305" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Error Rate</text>
+  <text x="305" y="68" text-anchor="middle" font-family="IBM Plex Mono" font-size="18" fill="#f87171">2.1%</text>
+  <text x="305" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f87171">⚠ above threshold</text>
+  <rect x="20" y="104" width="340" height="60" rx="2" fill="#161b22" stroke="#2a3441"/>
+  <text x="30" y="118" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">LOGS</text>
+  <text x="30" y="132" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">12:04:01 INFO  GET /api/users 200 44ms</text>
+  <text x="30" y="144" font-family="IBM Plex Mono" font-size="6" fill="#f87171">12:04:03 ERROR GET /api/orders 500 timeout</text>
+  <text x="30" y="156" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">12:04:05 INFO  GET /api/users 200 38ms</text>
+  </svg>`,
+
+  // Git — version history timeline
+  25:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="40" y1="80" x2="340" y2="80" stroke="#2a3441" stroke-width="2"/>
+  <text x="190" y="15" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">MAIN BRANCH · COMMIT HISTORY</text>
+  <circle cx="60" cy="80" r="8" fill="#4ade80" stroke="#0d1117" stroke-width="2"/>
+  <text x="60" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">v1.0</text>
+  <text x="60" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Initial</text>
+  <circle cx="140" cy="80" r="8" fill="#4ade80" stroke="#0d1117" stroke-width="2"/>
+  <text x="140" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">v1.1</text>
+  <text x="140" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Login feature</text>
+  <circle cx="220" cy="80" r="8" fill="#4ade80" stroke="#0d1117" stroke-width="2"/>
+  <text x="220" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">v1.2</text>
+  <text x="220" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Bug fix</text>
+  <circle cx="300" cy="80" r="8" fill="#f0a500" stroke="#0d1117" stroke-width="2"/>
+  <text x="300" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">HEAD</text>
+  <text x="300" y="56" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Dashboard</text>
+  <line x1="140" y1="88" x2="140" y2="125" stroke="#38bdf8" stroke-dasharray="3 2"/>
+  <line x1="140" y1="125" x2="240" y2="125" stroke="#38bdf8" stroke-width="1.5"/>
+  <circle cx="200" cy="125" r="7" fill="#38bdf8" stroke="#0d1117" stroke-width="2"/>
+  <circle cx="240" cy="125" r="7" fill="#38bdf8" stroke="#0d1117" stroke-width="2"/>
+  <text x="190" y="142" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#38bdf8">feature-branch (Alice working here)</text>
+  <path d="M244 120 L298 88" stroke="#38bdf8" stroke-dasharray="3 2"/>
+  <text x="260" y="108" font-family="IBM Plex Mono" font-size="6" fill="#38bdf8">merge</text>
+  <text x="190" y="172" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Every change recorded · parallel work · always revertible to any point</text>
+  </svg>`,
+
+  // Auto Scaling — demand curve
+  26:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">AUTO SCALING · SERVERS MATCH DEMAND</text>
+  <line x1="30" y1="160" x2="360" y2="160" stroke="#2a3441"/>
+  <line x1="30" y1="160" x2="30" y2="30" stroke="#2a3441"/>
+  <text x="20" y="163" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">0</text>
+  <text x="14" y="30" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">10</text>
+  <text x="368" y="163" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">time→</text>
+  <polyline points="30,150 80,145 110,130 140,90 160,50 180,45 200,60 220,100 250,130 280,145 320,148 360,150" stroke="#38bdf8" stroke-width="2" fill="none"/>
+  <text x="170" y="40" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">traffic spike</text>
+  <polyline points="30,150 80,145 110,132 140,95 160,55 180,50 200,65 220,105 250,133 280,147 320,150 360,152" stroke="#f0a500" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+  <text x="310" y="132" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">servers</text>
+  <text x="310" y="142" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">(auto-match)</text>
+  <text x="310" y="110" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">traffic</text>
+  <rect x="140" y="25" width="80" height="20" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="180" y="38" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">scale OUT ↑</text>
+  <rect x="230" y="140" width="70" height="16" rx="2" fill="#1c2330" stroke="#4ade80"/>
+  <text x="265" y="151" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">scale IN ↓</text>
+  <text x="190" y="185" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Pay only for what you use · no manual intervention · handles any spike</text>
+  </svg>`,
+
+  // Cloud Cost — smart plugs
+  27:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="15" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">CLOUD BILLING BREAKDOWN</text>
+  <rect x="20" y="26" width="340" height="130" rx="3" fill="#161b22" stroke="#2a3441"/>
+  <rect x="32" y="40" width="120" height="22" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="44" y="55" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">EC2 (compute)</text>
+  <rect x="158" y="40" width="180" height="22" rx="1" fill="#4ade8022"/>
+  <rect x="158" y="40" width="140" height="22" rx="1" fill="#4ade8044"/>
+  <text x="346" y="55" text-anchor="end" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">$124.20</text>
+  <rect x="32" y="68" width="120" height="22" rx="1" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="44" y="83" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">S3 (storage)</text>
+  <rect x="158" y="68" width="180" height="22" rx="1" fill="#38bdf822"/>
+  <rect x="158" y="68" width="40" height="22" rx="1" fill="#38bdf844"/>
+  <text x="346" y="83" text-anchor="end" font-family="IBM Plex Mono" font-size="7" fill="#38bdf8">$18.40</text>
+  <rect x="32" y="96" width="120" height="22" rx="1" fill="#1c2330" stroke="#f87171"/>
+  <text x="44" y="111" font-family="IBM Plex Mono" font-size="7" fill="#f87171">Data transfer</text>
+  <rect x="158" y="96" width="180" height="22" rx="1" fill="#f8717122"/>
+  <rect x="158" y="96" width="90" height="22" rx="1" fill="#f8717144"/>
+  <text x="346" y="111" text-anchor="end" font-family="IBM Plex Mono" font-size="7" fill="#f87171">$67.80 ⚠</text>
+  <rect x="32" y="124" width="120" height="22" rx="1" fill="#1c2330" stroke="#f0a500"/>
+  <text x="44" y="139" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">RDS (database)</text>
+  <rect x="158" y="124" width="180" height="22" rx="1" fill="#f0a50022"/>
+  <rect x="158" y="124" width="60" height="22" rx="1" fill="#f0a50044"/>
+  <text x="346" y="139" text-anchor="end" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">$34.10</text>
+  <line x1="32" y1="156" x2="348" y2="156" stroke="#2a3441"/>
+  <text x="260" y="170" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#cdd5e0">Total: $244.50</text>
+  <text x="190" y="186" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Set budget alerts · review unused resources monthly · biggest waste = forgotten VMs</text>
+  </svg>`,
+
+  // Reserved vs On-Demand — cost over time
+  28:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">COST OVER TIME · SAME WORKLOAD</text>
+  <line x1="40" y1="160" x2="350" y2="160" stroke="#2a3441"/>
+  <line x1="40" y1="160" x2="40" y2="30" stroke="#2a3441"/>
+  <text x="14" y="164" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">$0</text>
+  <text x="355" y="164" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">3yr→</text>
+  <line x1="40" y1="50" x2="350" y2="50" stroke="#f87171" stroke-width="2"/>
+  <text x="354" y="54" font-family="IBM Plex Mono" font-size="7" fill="#f87171">On-Demand</text>
+  <line x1="40" y1="50" x2="40" y2="130" stroke="#4ade80" stroke-width="2"/>
+  <line x1="40" y1="130" x2="350" y2="130" stroke="#4ade80" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="354" y="134" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">Reserved</text>
+  <text x="42" y="126" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">upfront</text>
+  <line x1="195" y1="50" x2="195" y2="130" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <text x="195" y="44" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">break-even</text>
+  <text x="195" y="145" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">~12 months</text>
+  <rect x="200" y="90" width="140" height="30" rx="2" fill="#4ade8011" stroke="#4ade8044"/>
+  <text x="270" y="106" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#4ade80">savings zone 💚</text>
+  <text x="190" y="180" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">Commit 1yr = ~40% off · 3yr = ~60% off · only for stable, predictable workloads</text>
+  </svg>`,
+
+  // Multi-Region — globe failover
+  29:`<svg width="380" height="200" viewBox="0 0 380 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="190" y="14" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#5a6a80" letter-spacing="1">MULTI-REGION ARCHITECTURE</text>
+  <rect x="30" y="24" width="140" height="80" rx="3" fill="#161b22" stroke="#4ade80"/>
+  <text x="100" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4ade80">Region: US-EAST</text>
+  <text x="100" y="54" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">PRIMARY</text>
+  <rect x="44" y="60" width="112" height="12" rx="1" fill="#1c2330" stroke="#4ade80"/>
+  <text x="100" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#4ade80">App + DB (primary)</text>
+  <rect x="44" y="76" width="112" height="12" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="100" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Load Balancer</text>
+  <rect x="210" y="24" width="140" height="80" rx="3" fill="#161b22" stroke="#38bdf8"/>
+  <text x="280" y="42" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#38bdf8">Region: EU-WEST</text>
+  <text x="280" y="54" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#5a6a80">SECONDARY</text>
+  <rect x="224" y="60" width="112" height="12" rx="1" fill="#1c2330" stroke="#38bdf8"/>
+  <text x="280" y="70" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#38bdf8">App + DB (replica)</text>
+  <rect x="224" y="76" width="112" height="12" rx="1" fill="#1c2330" stroke="#2a3441"/>
+  <text x="280" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">Load Balancer</text>
+  <line x1="170" y1="64" x2="210" y2="64" stroke="#f0a500" stroke-dasharray="4 2"/>
+  <text x="190" y="58" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#f0a500">replication</text>
+  <rect x="120" y="124" width="140" height="44" rx="3" fill="#161b22" stroke="#f0a500"/>
+  <text x="190" y="140" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#f0a500">Global Load Balancer</text>
+  <text x="190" y="154" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">DNS failover · routes nearest</text>
+  <text x="190" y="163" text-anchor="middle" font-family="IBM Plex Mono" font-size="6" fill="#5a6a80">auto-failover if region down</text>
+  <line x1="100" y1="104" x2="150" y2="124" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  <line x1="280" y1="104" x2="230" y2="124" stroke="#5a6a80" stroke-dasharray="3 2"/>
+  </svg>`
+};
+
+// ─────────────────────────────────────────────
+// LEARNING PATH STAGES
+// ─────────────────────────────────────────────
+const STAGES = [
+  {
+    label:"Stage 1 — The Basics", cls:"s1",
+    desc:"Start here. Fundamental concepts you'll encounter immediately.",
+    ids:[1,7,15,17,25,27,28]
+  },
+  {
+    label:"Stage 2 — Building Blocks", cls:"s2",
+    desc:"How cloud services connect and work together.",
+    ids:[2,9,12,13,18,19,23]
+  },
+  {
+    label:"Stage 3 — Going Deeper", cls:"s3",
+    desc:"Architecture, scale, and advanced patterns.",
+    ids:[3,4,5,6,8,10,11,14,16,20,21,22,24,26,29]
+  }
+];
+
+// ─────────────────────────────────────────────
+// CONCEPTS DATA
+// ─────────────────────────────────────────────
+const CONCEPTS = [
+  {id:1,title:"Virtual Machine (VM)",tagline:"A computer inside a computer, running in the cloud.",category:"compute",platforms:["aws","azure","gcp"],level:"foundational",keywords:"vm server instance ec2 compute host",concept:{summary:"A Virtual Machine is a software-based computer that runs inside a physical server in a data center. It behaves exactly like a real computer — it has an operating system, memory, CPU, and storage — but it exists only as software.",analogy:"Think of a hotel. One large building (the physical server) is divided into many rooms (VMs). Each room has its own space, its own key, and feels private — even though it shares walls with others."},practice:{useCases:["Running a web app or backend service that needs to be always on","Testing software in a controlled environment without affecting your real machine","Running Windows software on a Mac (or vice versa) via a cloud VM","At work: engineering teams use VMs to host services that power internal tools"],platforms:{aws:"EC2 (Elastic Compute Cloud)",azure:"Azure Virtual Machines",gcp:"Compute Engine"}}},
+  {id:2,title:"Serverless Computing",tagline:"Run code without thinking about servers at all.",category:"compute",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"serverless lambda functions faas event driven trigger",concept:{summary:"Serverless doesn't mean there are no servers — it means you don't have to manage them. You write a small piece of code (a 'function'), upload it, and the cloud runs it on demand. You only pay for the milliseconds it actually executes.",analogy:"Like a vending machine. You don't need to know anything about the factory or the truck that stocked it. You press a button, get what you need, and leave. The infrastructure is invisible."},practice:{useCases:["Automatically resizing images when someone uploads a photo to your website","Sending a welcome email whenever someone signs up — triggered by the event","Running a small personal project at near-zero cost — you only pay when it runs","Responding to form submissions on a website without a full backend server"],platforms:{aws:"Lambda",azure:"Azure Functions",gcp:"Cloud Functions / Cloud Run"}}},
+  {id:3,title:"Containers",tagline:"Package an app with everything it needs to run — anywhere.",category:"compute",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"docker container image microservices portable packaging",concept:{summary:"A container bundles an application with all its dependencies (libraries, settings, runtime) into a single portable unit. It runs consistently on any machine or cloud, eliminating 'it works on my machine' problems. Docker is the most popular tool for creating containers.",analogy:"A shipping container. It doesn't matter whether it goes on a truck, train, or cargo ship — the contents are standardized and protected. The ship (cloud) doesn't need to know what's inside."},practice:{useCases:["Deploying the same app consistently across development, testing, and production","Microservices: splitting a large app into small, independently deployable components","Personal projects: run a complex app locally or in the cloud with one command","At work: 'we're containerizing the service' means making it more portable and consistent"],platforms:{aws:"ECS, EKS (Docker + Kubernetes)",azure:"Azure Container Instances, AKS",gcp:"Cloud Run, GKE"}}},
+  {id:4,title:"Kubernetes",tagline:"The system that manages and orchestrates containers at scale.",category:"compute",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"kubernetes k8s orchestration pods cluster container management",concept:{summary:"Kubernetes (K8s) is an open-source system that automates deploying, scaling, and managing containerized applications. If containers are the boxes your apps live in, Kubernetes is the logistics company that decides where each box goes, restarts it if something breaks, and scales up when demand grows.",analogy:"An airport control tower. Dozens of planes (containers) need to land, take off, and reroute if weather changes. The control tower (Kubernetes) coordinates everything automatically — no one manually directs each plane."},practice:{useCases:["Running many microservices reliably — if one crashes, Kubernetes restarts it automatically","At work: when engineers say 'we're on K8s' or 'the cluster is acting up', this is it","Scaling a service up during peak hours and down at night, automatically","Rolling out new versions gradually to avoid any downtime for users"],platforms:{aws:"EKS (Elastic Kubernetes Service)",azure:"AKS (Azure Kubernetes Service)",gcp:"GKE (Google Kubernetes Engine)"}}},
+  {id:5,title:"Edge Computing",tagline:"Process data close to the user, not in a distant data center.",category:"compute",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"edge cdn latency distributed compute cloudflare workers regional",concept:{summary:"Edge computing moves processing power physically closer to end users — to servers at the 'edge' of the network rather than a central data center. This reduces latency dramatically, which matters for real-time applications.",analogy:"The difference between calling customer service at a local branch vs. central headquarters in another country. The local branch picks up faster and understands your region better."},practice:{useCases:["Personalizing a website's content (language, currency, promotions) before it even loads","Low-latency applications: video streaming, online gaming, real-time collaboration tools","Running security checks (bot detection, authentication) before traffic hits your servers","Personal projects: Cloudflare Workers is a free, beginner-friendly edge platform"],platforms:{aws:"Lambda@Edge, CloudFront Functions",azure:"Azure CDN + Edge Zones",gcp:"Cloud CDN + Media CDN"}}},
+  {id:6,title:"Spot / Preemptible Instances",tagline:"Cheap compute power with one catch: the cloud can take it back.",category:"compute",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"spot preemptible instance cost savings interruption batch discount cheap",concept:{summary:"Spot (AWS) and Preemptible (GCP) instances are spare cloud capacity sold at up to 90% discount. The catch: the provider can reclaim them with short notice (2 minutes) when demand rises. They're ideal for workloads that can tolerate interruption.",analogy:"Standby airline seats. You get a great price, but if the flight fills up, you might get bumped. Works perfectly for flexible travellers — not if you need to be at a wedding."},practice:{useCases:["Running large batch jobs overnight (data processing, video encoding, ML training)","Saving 60–90% on compute for non-critical or interruptible workloads","CI/CD pipelines and test environments that can restart easily if interrupted","At work: data engineering teams often use spot instances for ETL pipelines to cut costs"],platforms:{aws:"EC2 Spot Instances",azure:"Azure Spot VMs",gcp:"Preemptible / Spot VMs"}}},
+  {id:7,title:"Object Storage",tagline:"Store any file in the cloud — cheaply and at any scale.",category:"storage",platforms:["aws","azure","gcp"],level:"foundational",keywords:"s3 blob storage files images video backup object bucket",concept:{summary:"Object storage is how the cloud stores files — documents, images, videos, backups. Unlike a traditional folder system, files are stored as 'objects' with metadata, accessible via a web URL. It's infinitely scalable and very cheap.",analogy:"A massive warehouse with numbered lockers. You drop in a file, get a ticket (URL), and can retrieve it anytime from anywhere in the world."},practice:{useCases:["Hosting images or videos for a website or app","Storing automatic backups of your databases and systems","Sharing large files with colleagues without emailing attachments","Archiving old documents cheaply — often pennies per GB per month"],platforms:{aws:"S3 (Simple Storage Service)",azure:"Azure Blob Storage",gcp:"Google Cloud Storage"}}},
+  {id:8,title:"Block Storage",tagline:"The cloud equivalent of a hard drive attached directly to a server.",category:"storage",platforms:["aws","azure","gcp"],level:"foundational",keywords:"block storage disk ebs volume persistent drive ssd database",concept:{summary:"Block storage is low-level storage that acts like a physical hard drive attached to a server. Unlike object storage (accessed via URL), block storage is directly mounted to a VM — used for the OS, databases, or any data needing fast, frequent reads and writes.",analogy:"Object storage is a filing cabinet in a warehouse you access by order number. Block storage is the hard drive inside your own computer — always connected, always fast, used for everything running locally."},practice:{useCases:["Storing a database that a VM needs to read/write constantly at high speed","The boot disk of a virtual machine (where the operating system lives)","Any application requiring low-latency, persistent storage attached to a server","At work: databases and critical services almost always use block storage behind the scenes"],platforms:{aws:"EBS (Elastic Block Store)",azure:"Azure Managed Disks",gcp:"Persistent Disk"}}},
+  {id:9,title:"Managed Database",tagline:"Use a database without managing the server it runs on.",category:"storage",platforms:["aws","azure","gcp"],level:"foundational",keywords:"database sql rds postgres mysql nosql managed dbaas",concept:{summary:"A managed database is a database service where the cloud provider handles installation, patching, backups, and scaling. You just connect and use it. No sysadmin required.",analogy:"Renting a fully furnished apartment vs. building your own house. The landlord handles maintenance — you just live in it."},practice:{useCases:["Storing user data for an app (accounts, orders, preferences)","Running a personal project that needs structured data without the setup overhead","At work: almost every internal tool or app connects to a managed database","Automatic daily backups and point-in-time recovery — without you doing anything"],platforms:{aws:"RDS, Aurora, DynamoDB",azure:"Azure SQL, Cosmos DB",gcp:"Cloud SQL, Firestore, Spanner"}}},
+  {id:10,title:"Data Warehouse",tagline:"A database built for analysis, not for day-to-day transactions.",category:"storage",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"data warehouse analytics bigquery redshift sql reporting bi business intelligence",concept:{summary:"A data warehouse stores large volumes of historical data optimized for querying and analysis. While a regular database handles 'look up this user's order', a data warehouse answers 'how many orders came from Europe last quarter, broken down by product?'",analogy:"A regular database is the cash register (real-time transactions). A data warehouse is the accounting archive — every transaction ever recorded, organized for pattern analysis across years."},practice:{useCases:["Running business intelligence reports and dashboards (sales trends, user behavior)","Combining data from multiple sources (CRM, sales, marketing) into one place for analysis","At work: when data analysts say 'I'll query the warehouse', this is what they mean","Powering tools like Tableau, Looker, or Power BI with large-scale data"],platforms:{aws:"Redshift",azure:"Azure Synapse Analytics",gcp:"BigQuery"}}},
+  {id:11,title:"Caching",tagline:"Store recent results so you don't recompute them every time.",category:"storage",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"cache redis memcached performance speed latency temporary memory in-memory",concept:{summary:"Caching stores frequently accessed data in fast memory (RAM) so future requests can be served instantly — without hitting the database. Redis and Memcached are the most common tools. Think of it as short-term memory vs. long-term storage.",analogy:"A bartender who memorizes your 'usual'. Instead of checking the menu and looking up your order every time, they remember it. Faster for everyone, less work for the system."},practice:{useCases:["Storing user session data so a login doesn't hit the database on every page load","Caching the results of expensive database queries that rarely change","Rate limiting: tracking how many API requests a user has made per minute","At work: 'the cache is stale' means users are seeing outdated data that hasn't refreshed yet"],platforms:{aws:"ElastiCache (Redis / Memcached)",azure:"Azure Cache for Redis",gcp:"Memorystore"}}},
+  {id:12,title:"CDN (Content Delivery Network)",tagline:"Serve your website fast to users everywhere in the world.",category:"network",platforms:["aws","azure","gcp"],level:"foundational",keywords:"cdn content delivery network cloudfront performance global edge cache static",concept:{summary:"A CDN is a network of servers spread around the globe. Instead of every user reaching one central server, the CDN serves content from the location nearest to the user — dramatically reducing load times.",analogy:"Like a chain of coffee shops. Instead of everyone driving to the one original location across town, there's a branch near you. Same coffee, much faster."},practice:{useCases:["Making your website load fast for users in different countries","Delivering images and videos without slow download times","Reducing load on your main server by caching static content at the edge","Essential if your site or app has a global or international audience"],platforms:{aws:"CloudFront",azure:"Azure CDN / Front Door",gcp:"Cloud CDN"}}},
+  {id:13,title:"Load Balancer",tagline:"Distribute traffic evenly so no single server gets overwhelmed.",category:"network",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"load balancer traffic distribution high availability failover health check",concept:{summary:"A load balancer sits in front of your servers and distributes incoming requests across multiple instances. If one server gets too busy or crashes, the balancer redirects traffic to healthy ones automatically.",analogy:"A traffic officer at a busy intersection directing cars into multiple parking lanes. Everyone gets through — no single lane backs up, and if one lane closes, traffic flows to the others."},practice:{useCases:["Handling traffic spikes (product launch, viral post) without the site going down","Running multiple servers so if one fails, the service keeps working","Gradually rolling out a new version to a small portion of users first","At work: nearly every production web service uses a load balancer"],platforms:{aws:"ELB (Elastic Load Balancing)",azure:"Azure Load Balancer / Application Gateway",gcp:"Cloud Load Balancing"}}},
+  {id:14,title:"VPC (Virtual Private Cloud)",tagline:"Your own private, isolated section of the cloud.",category:"network",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"vpc virtual private cloud network subnet firewall isolation security groups",concept:{summary:"A VPC is a logically isolated network within the cloud where you control IP ranges, subnets, routing rules, and what can access the internet. It's the networking foundation that almost everything else sits inside.",analogy:"A gated community inside a large city. The city is the cloud provider. Your community (VPC) has its own streets, rules, and security — even though it shares the city's broader infrastructure."},practice:{useCases:["Keeping databases private (not exposed to the internet) while web servers talk to them","Meeting compliance requirements that demand network isolation between environments","At work: when engineering talks about 'our network setup' or 'security groups', it's VPC","Connecting your office network to cloud resources securely via VPN or private link"],platforms:{aws:"VPC",azure:"Virtual Network (VNet)",gcp:"Virtual Private Cloud"}}},
+  {id:15,title:"DNS (Domain Name System)",tagline:"How a domain name gets translated into an actual server address.",category:"network",platforms:["aws","azure","gcp"],level:"foundational",keywords:"dns domain name routing records A CNAME hosted zone subdomain",concept:{summary:"DNS is the internet's phone book. When you type 'mycompany.com', DNS translates that human-readable name into an IP address that computers use to find the right server. Cloud providers offer managed DNS services to control these records.",analogy:"Asking a concierge for the address of a restaurant by name. You say 'La Maison', they look it up and give you the street address. Without them, you'd need to memorize every IP address."},practice:{useCases:["Pointing your domain name to your cloud server or website","Setting up subdomains: api.mycompany.com, blog.mycompany.com","Failover routing: automatically send traffic to a backup server if the main one fails","At work: 'we updated the DNS records' means they changed where a domain points"],platforms:{aws:"Route 53",azure:"Azure DNS",gcp:"Cloud DNS"}}},
+  {id:16,title:"API Gateway",tagline:"The single front door for all your application's APIs.",category:"network",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"api gateway rest http endpoint routing authentication rate limit throttle",concept:{summary:"An API Gateway is a managed service that sits in front of your APIs and handles routing, authentication, rate limiting, logging, and transformations in one place. Instead of clients calling many different services directly, they call one gateway.",analogy:"A hotel front desk. Guests don't knock on the kitchen door for food, or go directly to housekeeping for towels. They call the front desk, which routes each request to the right department — and keeps a log of everything."},practice:{useCases:["Exposing internal microservices to mobile apps or partners through one clean URL","Adding authentication and rate limiting to APIs without modifying each service","At work: 'the gateway is throttling requests' means someone is hitting rate limits","Personal projects: combine multiple serverless functions behind a single API"],platforms:{aws:"API Gateway",azure:"Azure API Management",gcp:"Apigee / Cloud Endpoints"}}},
+  {id:17,title:"IAM (Identity & Access Management)",tagline:"Control who can access what in your cloud account.",category:"security",platforms:["aws","azure","gcp"],level:"foundational",keywords:"iam permissions roles users policy access control service account",concept:{summary:"IAM is the system that defines who (users, services, apps) can do what (read, write, delete) on which resources. It's the cloud's permission system — like a very granular key management office for your entire cloud account.",analogy:"A company building with different key cards. The receptionist can enter the lobby and meeting rooms. IT staff can enter the server room. No one accidentally gets access to payroll."},practice:{useCases:["Giving a developer access to a specific project's storage — and nothing else","Setting up a service account so an app can read a database without human credentials","Preventing accidental deletion of critical resources by restricting who can delete","Auditing who accessed what and when — useful for compliance and security reviews"],platforms:{aws:"IAM (Identity and Access Management)",azure:"Azure Active Directory / RBAC",gcp:"Cloud IAM"}}},
+  {id:18,title:"Encryption at Rest & in Transit",tagline:"Two moments your data needs protection — stored and moving.",category:"security",platforms:["aws","azure","gcp"],level:"foundational",keywords:"encryption tls ssl https rest transit data protection security kms",concept:{summary:"Encryption at rest means data is scrambled when stored (on disk, in a database). Encryption in transit means data is scrambled while moving between systems (browser to server, service to service). Both are essential — most cloud services enable them by default.",analogy:"A letter that's both locked in a safe (at rest) and inside a sealed, tamper-evident envelope when mailed (in transit). Protecting it in just one state leaves a gap."},practice:{useCases:["Compliance: regulations like GDPR, HIPAA, and SOC 2 require both types of encryption","HTTPS on your website is encryption in transit — browsers show the padlock icon","At work: 'all data is encrypted at rest and in transit' is a standard security requirement","Encrypting database backups so a stolen backup file can't be read"],platforms:{aws:"KMS (Key Management Service), ACM",azure:"Azure Key Vault, TLS via App Gateway",gcp:"Cloud KMS, Certificate Manager"}}},
+  {id:19,title:"Secrets Management",tagline:"Store passwords and API keys safely — never hardcoded in your code.",category:"security",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"secrets vault credentials api keys passwords configuration environment variables",concept:{summary:"Secrets management is storing sensitive credentials (database passwords, API keys, tokens) in a dedicated secure service rather than in code or config files that can be accidentally committed to version control.",analogy:"A locked safe for the master keys to your building. You don't tape the keys to the front door (put them in code), you don't leave them on your desk — you store them in a controlled vault with an access log."},practice:{useCases:["Storing database passwords that your app retrieves at runtime — never hardcoded","Rotating API keys automatically without redeploying your application","At work: 'the secret is in Vault' or 'pull it from Secrets Manager' is routine","Preventing credential leaks from accidentally committed config files on GitHub"],platforms:{aws:"Secrets Manager, Parameter Store",azure:"Azure Key Vault",gcp:"Secret Manager"}}},
+  {id:20,title:"DDoS Protection",tagline:"Defending against attacks that try to flood your service offline.",category:"security",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"ddos attack traffic flood protection shield waf firewall bot",concept:{summary:"A Distributed Denial of Service (DDoS) attack floods your service with so many fake requests that real users can't get through. Cloud providers offer protection layers that detect and absorb abnormal traffic before it reaches your servers.",analogy:"A mob blocking the entrance to a shop so real customers can't get in. DDoS protection is a bouncer who spots the pattern — everyone in the mob is wearing the same hat — and turns them away while letting real shoppers through."},practice:{useCases:["Protecting a public website or API from being taken offline by bot attacks","High-profile launches or events that attract malicious traffic","At work: enterprise cloud accounts usually have baseline DDoS protection included","Personal projects: Cloudflare's free tier provides solid DDoS protection automatically"],platforms:{aws:"AWS Shield, WAF",azure:"Azure DDoS Protection",gcp:"Cloud Armor"}}},
+  {id:21,title:"Infrastructure as Code (IaC)",tagline:"Define your cloud setup in files, not by clicking through a UI.",category:"devops",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"infrastructure as code iac automation cloudformation bicep reproducible",concept:{summary:"Infrastructure as Code means describing your cloud resources (servers, databases, networks) in code files that can be version controlled and applied automatically. Instead of manually clicking through a cloud console, you declare what you want and the tool builds it.",analogy:"A recipe vs. cooking from memory. Anyone with the recipe can recreate the exact dish. If you cook from memory, you get something different every time — and can't share the process with a colleague."},practice:{useCases:["Recreating an entire environment (dev, staging, production) identically with one command","Reviewing infrastructure changes like you'd review code — before they go live","At work: 'the infra is in code' means changes go through pull requests, not manual clicks","Disaster recovery: rebuild everything from scratch if a region goes down"],platforms:{aws:"CloudFormation, CDK",azure:"ARM Templates, Bicep",gcp:"Deployment Manager, Config Connector"}}},
+  {id:22,title:"Terraform",tagline:"The most popular tool for infrastructure as code — works across any cloud.",category:"devops",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"terraform hashicorp hcl iac infrastructure provisioning multi-cloud state plan apply",concept:{summary:"Terraform is an open-source tool by HashiCorp that lets you write infrastructure as code in a simple language called HCL (HashiCorp Configuration Language). It's cloud-agnostic — the same workflow works for AWS, Azure, GCP, and hundreds of other services. You declare what you want, Terraform figures out what needs to change, and applies it.",analogy:"A universal remote control for your cloud. Instead of learning separate remotes (consoles) for each TV brand (cloud provider), Terraform is the one remote that speaks all their languages fluently."},practice:{useCases:["At work: 'we're terraforming the new environment' means Terraform is building the infrastructure","Managing resources across AWS and Azure simultaneously from one codebase","Personal projects: spin up a GCP server, configure networking, and tear it all down — in minutes","Why infra changes go through code review: Terraform files live in Git just like application code"],platforms:{aws:"AWS Provider for Terraform",azure:"AzureRM Provider",gcp:"Google Cloud Provider"}}},
+  {id:23,title:"CI/CD Pipeline",tagline:"Automate how code goes from a developer's laptop to your users.",category:"devops",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"cicd continuous integration deployment pipeline automation build release github actions",concept:{summary:"CI/CD stands for Continuous Integration / Continuous Deployment. It's an automated workflow that takes code written by developers, runs tests on it, and if everything passes, deploys it to production automatically — no manual steps needed.",analogy:"An assembly line in a factory. Raw parts come in one end (code), go through quality checks, and finished products come out the other end (live updates in your app) — all automated, no human needed in the middle."},practice:{useCases:["Releasing app updates multiple times per day without manual deployment steps","Catching bugs automatically before they reach real users via automated tests","Understanding why engineering says 'we're in a code freeze' before a major release","At work: every time you see a new feature in a product, a CI/CD pipeline shipped it"],platforms:{aws:"CodePipeline, CodeBuild",azure:"Azure DevOps, GitHub Actions",gcp:"Cloud Build"}}},
+  {id:24,title:"Monitoring & Observability",tagline:"Know when something breaks — ideally before your users do.",category:"devops",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"monitoring observability logging metrics alerts cloudwatch datadog grafana tracing",concept:{summary:"Monitoring tracks whether your system is healthy (uptime, error rates, response times). Observability goes deeper — it means having enough data (logs, metrics, traces) to understand why something is wrong, not just that it is.",analogy:"A car dashboard. The warning lights are monitoring (something is wrong). Plugging in a diagnostic tool that tells you exactly which sensor failed and why is observability."},practice:{useCases:["Getting paged immediately when error rates spike — before users start complaining","Dashboards that show response times, database query duration, and CPU usage in real time","At work: 'check the logs' and 'look at the dashboard' are standard first steps in any incident","Setting spending alerts so you know when cloud costs spike unexpectedly"],platforms:{aws:"CloudWatch",azure:"Azure Monitor, Application Insights",gcp:"Cloud Monitoring, Cloud Logging"}}},
+  {id:25,title:"Git & Version Control",tagline:"The foundation that tracks every change to code — and who made it.",category:"devops",platforms:["aws","azure","gcp"],level:"foundational",keywords:"git version control github gitlab repository branch commit history pull request",concept:{summary:"Git is the system that tracks changes to code over time. Every change (commit) is recorded with who made it and why. Teams use branches to work in parallel without overwriting each other, and merge their changes when ready. GitHub and GitLab are platforms that host Git repositories in the cloud.",analogy:"Google Docs' version history — for code. You can see every change ever made, who made it, revert to any past version, and have multiple people editing simultaneously without conflict."},practice:{useCases:["At work: code reviews ('pull requests'), deployment approvals, and audit trails all live in Git","Infrastructure as Code files (Terraform, etc.) live in Git just like application code","Understanding conversations about 'main branch', 'merging', or 'reverting a commit'","Personal projects: free on GitHub — essential even for solo work as a safety net"],platforms:{aws:"CodeCommit (or GitHub/GitLab)",azure:"Azure Repos / GitHub",gcp:"Cloud Source Repositories / GitHub"}}},
+  {id:26,title:"Auto Scaling",tagline:"Your infrastructure grows and shrinks automatically with demand.",category:"cost",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"auto scaling elasticity demand traffic spike cost optimization horizontal vertical",concept:{summary:"Auto scaling monitors your application's load and automatically adds more server instances when traffic spikes, and removes them when traffic drops. You only pay for what you actually use.",analogy:"A restaurant that magically adds tables and waitstaff during the lunch rush, then removes them when it quiets down — without you hiring or scheduling anyone."},practice:{useCases:["A marketing campaign sends millions of people to your site — it handles the spike, then scales back","Cost optimization: don't pay for 10 servers overnight when 2 would do","Seasonal businesses (retail, events) that have predictable traffic patterns","At work: engineering uses this to manage cost and reliability simultaneously"],platforms:{aws:"EC2 Auto Scaling, Application Auto Scaling",azure:"Azure VM Scale Sets",gcp:"Managed Instance Groups"}}},
+  {id:27,title:"Cloud Cost Management",tagline:"Understand and control what you're actually paying for.",category:"cost",platforms:["aws","azure","gcp"],level:"foundational",keywords:"cost billing budget spending optimization unused resources waste finops",concept:{summary:"Cloud billing is complex — you pay for compute time, storage volume, data transfer, API calls, and more. Cost management tools help you track spending, set budgets, and optimize usage to avoid surprise bills. Unused resources left running are the most common cause of waste.",analogy:"A detailed electricity bill that shows every device, how long it ran, and what it cost. Good cost management is like putting smart plugs everywhere so you know what's consuming power — and can switch things off remotely."},practice:{useCases:["Setting spending alerts so you never get a $500 surprise bill on a personal project","Identifying unused resources left running by accident — the biggest waste in cloud","At work: understanding why engineering decisions affect the company's cloud budget","Choosing between on-demand vs reserved pricing for predictable workloads"],platforms:{aws:"AWS Cost Explorer, Budgets",azure:"Azure Cost Management + Billing",gcp:"Cloud Billing, Cost Table"}}},
+  {id:28,title:"Reserved vs On-Demand Pricing",tagline:"Pay as you go, or commit upfront for a major discount.",category:"cost",platforms:["aws","azure","gcp"],level:"foundational",keywords:"reserved pricing on-demand commitment savings plan cost discount 1 year 3 year",concept:{summary:"On-demand pricing means you pay for resources by the hour or second with no commitment — maximum flexibility, highest cost per unit. Reserved pricing means committing to use a resource for 1 or 3 years in exchange for discounts of 40–70%. Savings Plans offer a flexible middle ground.",analogy:"Hotel room pricing. The walk-in rate is highest (on-demand). Booking 6 months in advance gets you a discount (reserved). An annual membership usable at any property gets you the best rate (savings plan)."},practice:{useCases:["Databases and servers that run 24/7 are ideal for reserved pricing — the math usually wins","Dev and test environments that run intermittently should stay on-demand","At work: FinOps teams analyze usage patterns to identify what to reserve each year","Personal projects: on-demand is almost always right unless running something continuously"],platforms:{aws:"Reserved Instances, Savings Plans",azure:"Azure Reservations",gcp:"Committed Use Discounts"}}},
+  {id:29,title:"Multi-Region Architecture",tagline:"Run your service in multiple locations for resilience and speed.",category:"cost",platforms:["aws","azure","gcp"],level:"intermediate",keywords:"multi region availability disaster recovery failover latency global redundancy",concept:{summary:"Running infrastructure in multiple geographic regions means if one data center has an outage, your service automatically fails over to another. It also means users in different continents get served from the closest location, reducing latency.",analogy:"A company with offices in New York, London, and Singapore. If the New York office has a power outage, London handles those calls. And a client in Asia gets routed to Singapore — not made to wait for New York."},practice:{useCases:["High-availability services where downtime is unacceptable (banking, healthcare, e-commerce)","Global products where latency matters for users in different continents","Disaster recovery: a full region going down (it has happened) doesn't take you offline","At work: 'we're multi-region' is a significant reliability and cost investment — worth understanding why"],platforms:{aws:"Multiple AWS Regions + Route 53 failover",azure:"Azure Paired Regions, Traffic Manager",gcp:"Multi-Region deployments, Global Load Balancing"}}}
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let activeFilter = 'all';
+let searchQuery  = '';
+let openIndex    = 0;
+let activePane   = 'concept';
+let filteredIds  = [];
+let done         = new Set(JSON.parse(localStorage.getItem('cloud_done')||'[]'));
+
+function saveDone(){ localStorage.setItem('cloud_done', JSON.stringify([...done])); }
+
+// ─────────────────────────────────────────────
+// FILTER + SEARCH
+// ─────────────────────────────────────────────
+function getVisible(){
+  const q = searchQuery.toLowerCase().trim();
+  return CONCEPTS.filter(c=>{
+    if(activeFilter!=='all' && c.category!==activeFilter) return false;
+    if(!q) return true;
+    const hay=[c.title,c.tagline,c.keywords,c.concept.summary,c.concept.analogy,
+      c.practice.useCases.join(' '),Object.values(c.practice.platforms).join(' ')].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+}
+function hl(t,q){
+  if(!q) return t;
+  const e=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return t.replace(new RegExp(`(${e})`,'gi'),'<mark>$1</mark>');
+}
+
+// ─────────────────────────────────────────────
+// RENDER CARDS
+// ─────────────────────────────────────────────
+function renderCards(){
+  const grid=document.getElementById('cardGrid');
+  const noR =document.getElementById('noResults');
+  const vis =getVisible();
+  filteredIds=vis.map(c=>c.id);
+  const q=searchQuery.toLowerCase().trim();
+  grid.innerHTML='';
+  if(vis.length===0){
+    noR.classList.add('visible'); grid.style.display='none';
+  } else {
+    noR.classList.remove('visible'); grid.style.display='';
+    vis.forEach(c=>{
+      const card=document.createElement('div');
+      card.className='card';
+      const catL=c.category.charAt(0).toUpperCase()+c.category.slice(1);
+      const plat=c.platforms.map(p=>`<span class="tag plat plat-${p}">${p.toUpperCase()}</span>`).join('');
+      card.innerHTML=`
+        <div class="card-top">
+          <div class="card-tags"><span class="tag cat-${c.category}">${catL}</span></div>
+          <span class="level-dot ${c.level}" title="${c.level}"></span>
+        </div>
+        <div class="card-title">${hl(c.title,q)}</div>
+        <div class="card-tagline">${hl(c.tagline,q)}</div>
+        <div class="card-tags" style="margin-top:.15rem">${plat}</div>
+        <div class="card-hint">${done.has(c.id)?'✓ done · click to review':'click to explore'}</div>`;
+      card.addEventListener('click',()=>openModal(c.id));
+      grid.appendChild(card);
+    });
+  }
+  document.getElementById('countBadge').textContent=`${vis.length} / ${CONCEPTS.length} concepts`;
+}
+
+// ─────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────
+function renderSidebar(){
+  const scroll=document.getElementById('sidebarScroll');
+  scroll.innerHTML='';
+  STAGES.forEach(stage=>{
+    const block=document.createElement('div');
+    block.className='stage-block';
+    block.innerHTML=`<div class="stage-header"><span class="stage-dot ${stage.cls}"></span>${stage.label}</div>`;
+    stage.ids.forEach((id,i)=>{
+      const c=CONCEPTS.find(x=>x.id===id);
+      const isDone=done.has(id);
+      const btn=document.createElement('button');
+      btn.className='path-item'+(isDone?' done':'');
+      btn.innerHTML=`
+        <div class="path-check"><span class="check-icon">✓</span></div>
+        <span class="path-num">${i+1}</span>
+        <span class="path-title">${c.title}</span>`;
+      btn.addEventListener('click',()=>{
+        closeSidebar();
+        openModal(id);
+      });
+      block.appendChild(btn);
+    });
+    scroll.appendChild(block);
+  });
+  const resetBtn=document.createElement('button');
+  resetBtn.className='sidebar-reset';
+  resetBtn.textContent='Reset progress';
+  resetBtn.addEventListener('click',()=>{
+    done.clear(); saveDone(); updateProgress(); renderSidebar(); renderCards();
+  });
+  scroll.appendChild(resetBtn);
+}
+
+function updateProgress(){
+  const total=CONCEPTS.length;
+  const count=done.size;
+  const pct=Math.round(count/total*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressCounts').textContent=`${count} of ${total} concepts visited`;
+  document.getElementById('togglePip').textContent=count;
+}
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('mainContent').classList.add('sidebar-open');
+  document.getElementById('sidebarToggle').classList.add('sidebar-open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mainContent').classList.remove('sidebar-open');
+  document.getElementById('sidebarToggle').classList.remove('sidebar-open');
+}
+
+// ─────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────
+function openModal(id){
+  openIndex=CONCEPTS.findIndex(c=>c.id===id);
+  activePane='concept';
+  renderModal();
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function renderModal(){
+  const c=CONCEPTS[openIndex];
+  const catL=c.category.charAt(0).toUpperCase()+c.category.slice(1);
+  const plat=c.platforms.map(p=>`<span class="tag plat plat-${p}">${p.toUpperCase()}</span>`).join('');
+  document.getElementById('modalTags').innerHTML=
+    `<span class="tag cat-${c.category}">${catL}</span><span class="tag plat">${c.level}</span>`+plat;
+  document.getElementById('modalTitle').textContent=c.title;
+
+  document.getElementById('pane-concept').innerHTML=`
+    <div class="modal-section-label">Overview</div>
+    <div class="modal-text">${c.concept.summary}</div>
+    <div class="analogy-box">
+      <div class="modal-section-label">Analogy</div>
+      <div class="modal-text">${c.concept.analogy}</div>
+    </div>`;
+
+  const platRows=Object.entries(c.practice.platforms).map(([p,n])=>
+    `<div class="plat-row"><span class="plat-label ${p}">${p.toUpperCase()}</span><span>${n}</span></div>`
+  ).join('');
+  document.getElementById('pane-practice').innerHTML=`
+    <div class="modal-section-label">When you'd actually use this</div>
+    <ul class="use-cases">${c.practice.useCases.map(u=>`<li>${u}</li>`).join('')}</ul>
+    <div class="platform-note">
+      <div class="modal-section-label">What it's called on each platform</div>${platRows}
+    </div>`;
+
+  const svg=VISUALS[c.id]||`<div style="text-align:center;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;font-size:.7rem;padding:2rem">Visual coming soon</div>`;
+  document.getElementById('pane-visual').innerHTML=`
+    <div class="visual-wrap">${svg}</div>`;
+
+  // done button
+  const isDone=done.has(c.id);
+  const doneBtn=document.getElementById('doneBtn');
+  const doneLabel=document.getElementById('doneLabel');
+  doneBtn.textContent=isDone?'Mark as not done':'Mark as done';
+  doneBtn.className='done-btn'+(isDone?' is-done':'');
+  doneLabel.textContent=isDone?'Completed ✓':'';
+
+  setPane(activePane);
+
+  const navSet=filteredIds.length?filteredIds:CONCEPTS.map(c=>c.id);
+  const pos=navSet.indexOf(c.id);
+  document.getElementById('prevBtn').disabled=pos<=0;
+  document.getElementById('nextBtn').disabled=pos>=navSet.length-1;
+}
+
+function setPane(pane){
+  activePane=pane;
+  document.querySelectorAll('.modal-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`pane-${pane}`).classList.add('active');
+  document.querySelector(`[data-pane="${pane}"]`).classList.add('active');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function navStep(dir){
+  const navSet=filteredIds.length?filteredIds:CONCEPTS.map(c=>c.id);
+  const pos=navSet.indexOf(CONCEPTS[openIndex].id);
+  const next=pos+dir;
+  if(next>=0&&next<navSet.length){
+    openIndex=CONCEPTS.findIndex(c=>c.id===navSet[next]);
+    renderModal();
+  }
+}
+
+// ─────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────
+document.getElementById('filterGroup').addEventListener('click',e=>{
+  const btn=e.target.closest('.filter-btn');
+  if(!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter=btn.dataset.cat;
+  renderCards();
+});
+
+const searchInput=document.getElementById('searchInput');
+const searchClear=document.getElementById('searchClear');
+searchInput.addEventListener('input',()=>{
+  searchQuery=searchInput.value;
+  searchClear.classList.toggle('visible',searchQuery.length>0);
+  renderCards();
+});
+searchClear.addEventListener('click',()=>{
+  searchInput.value=''; searchQuery='';
+  searchClear.classList.remove('visible');
+  searchInput.focus(); renderCards();
+});
+
+document.getElementById('sidebarToggle').addEventListener('click',()=>{
+  document.getElementById('sidebar').classList.contains('open')?closeSidebar():openSidebar();
+});
+document.getElementById('sidebarClose').addEventListener('click',closeSidebar);
+
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('overlay').addEventListener('click',e=>{
+  if(e.target===document.getElementById('overlay')) closeModal();
+});
+document.querySelector('.mode-toggle').addEventListener('click',e=>{
+  const btn=e.target.closest('.mode-btn');
+  if(btn) setPane(btn.dataset.pane);
+});
+document.getElementById('prevBtn').addEventListener('click',()=>navStep(-1));
+document.getElementById('nextBtn').addEventListener('click',()=>navStep(1));
+
+document.getElementById('doneBtn').addEventListener('click',()=>{
+  const c=CONCEPTS[openIndex];
+  if(done.has(c.id)) done.delete(c.id); else done.add(c.id);
+  saveDone(); updateProgress(); renderSidebar(); renderCards();
+  const isDone=done.has(c.id);
+  const btn=document.getElementById('doneBtn');
+  btn.textContent=isDone?'Mark as not done':'Mark as done';
+  btn.className='done-btn'+(isDone?' is-done':'');
+  document.getElementById('doneLabel').textContent=isDone?'Completed ✓':'';
+});
+
+document.addEventListener('keydown',e=>{
+  const isOpen=document.getElementById('overlay').classList.contains('open');
+  if(!isOpen){
+    if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();searchInput.focus();}
+    return;
+  }
+  if(e.key==='Escape') closeModal();
+  if(e.key==='ArrowLeft') navStep(-1);
+  if(e.key==='ArrowRight') navStep(1);
+});
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+renderSidebar();
+updateProgress();
+renderCards();
+</script>
+</body>
+</html>
