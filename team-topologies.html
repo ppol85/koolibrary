@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Topologies · Reference Guide</title>
+<style>
+  :root {
+    --bg: #f9f7f4;
+    --surface: #ffffff;
+    --border: #e8e3dc;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5a5a5a;
+    --text-muted: #9a9a9a;
+    --accent: #2d5a8e;
+
+    --tag-stream: #1a6b3c;
+    --tag-stream-bg: #e8f5ee;
+    --tag-platform: #1a4a8e;
+    --tag-platform-bg: #e8eef8;
+    --tag-enabling: #7a4a1a;
+    --tag-enabling-bg: #f8f0e8;
+    --tag-subsystem: #5a1a6b;
+    --tag-subsystem-bg: #f3e8f8;
+
+    --tag-collab: #1a5a5a;
+    --tag-collab-bg: #e8f5f5;
+    --tag-xas: #1a6b3c;
+    --tag-xas-bg: #e8f5ee;
+    --tag-facilitating: #7a4a1a;
+    --tag-facilitating-bg: #f8f0e8;
+
+    --tag-principle: #3a3a3a;
+    --tag-principle-bg: #efefef;
+    --tag-supporting: #6b3a1a;
+    --tag-supporting-bg: #f8ede8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 48px 24px 80px;
+  }
+
+  .header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 48px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .header .subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+
+  .header .meta {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header .meta span::before {
+    content: '·';
+    margin-right: 6px;
+    opacity: 0.4;
+  }
+
+  .header .meta span:first-child::before { content: ''; margin: 0; }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .filter-btn {
+    padding: 7px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s, transform 0.1s;
+    position: relative;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    border-color: #ccc;
+    transform: translateY(-1px);
+  }
+
+  .card.open {
+    border-color: var(--accent);
+    box-shadow: 0 6px 24px rgba(45,90,142,0.10);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 650;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .card-toggle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: transform 0.2s;
+  }
+
+  .card.open .card-toggle { transform: rotate(45deg); }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .tag-stream-aligned   { color: var(--tag-stream);    background: var(--tag-stream-bg); }
+  .tag-platform         { color: var(--tag-platform);  background: var(--tag-platform-bg); }
+  .tag-enabling         { color: var(--tag-enabling);  background: var(--tag-enabling-bg); }
+  .tag-subsystem        { color: var(--tag-subsystem); background: var(--tag-subsystem-bg); }
+  .tag-collaboration    { color: var(--tag-collab);    background: var(--tag-collab-bg); }
+  .tag-xasaservice      { color: var(--tag-xas);       background: var(--tag-xas-bg); }
+  .tag-facilitating     { color: var(--tag-facilitating); background: var(--tag-facilitating-bg); }
+  .tag-principle        { color: var(--tag-principle); background: var(--tag-principle-bg); }
+  .tag-supporting       { color: var(--tag-supporting); background: var(--tag-supporting-bg); }
+
+  .card-summary {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  .card-body {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card.open .card-body { display: block; }
+
+  .card-body p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+
+  .card-body p:last-child { margin-bottom: 0; }
+
+  .card-body ul {
+    padding-left: 18px;
+    margin-bottom: 12px;
+  }
+
+  .card-body ul li {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 5px;
+  }
+
+  .card-body .label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    margin-top: 14px;
+    display: block;
+  }
+
+  .card-body .label:first-child { margin-top: 0; }
+
+  .card-body .highlight {
+    background: #f3f0eb;
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 14px;
+    line-height: 1.6;
+  }
+
+  .card-body .highlight strong {
+    color: var(--accent);
+    font-weight: 650;
+  }
+
+  /* Hidden cards */
+  .card.hidden { display: none; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 64px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* Count badge */
+  .count-badge {
+    display: inline-block;
+    background: #efefef;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Team Topologies</h1>
+  <div class="subtitle">Organizing Business and Technology Teams for Fast Flow</div>
+  <div class="meta">
+    <span>Matthew Skelton &amp; Manuel Pais</span>
+    <span>IT Revolution Press, 2019</span>
+    <span id="concept-count">19 concepts</span>
+  </div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All <span class="count-badge" id="badge-all">19</span></button>
+  <button class="filter-btn" data-filter="team-type">Team Types <span class="count-badge">4</span></button>
+  <button class="filter-btn" data-filter="interaction">Interaction Modes <span class="count-badge">3</span></button>
+  <button class="filter-btn" data-filter="principle">Org Design Principles <span class="count-badge">7</span></button>
+  <button class="filter-btn" data-filter="supporting">Supporting Concepts <span class="count-badge">5</span></button>
+</div>
+
+<div class="grid" id="grid">
+
+  <!-- ── TEAM TYPES ─────────────────────────────────── -->
+
+  <div class="card" data-category="team-type">
+    <div class="card-header">
+      <div class="card-title">Stream-Aligned Team</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-stream-aligned">Team Type</span>
+    <div class="card-summary">The primary team type. Owns a slice of the business domain or customer journey end-to-end, and delivers value continuously without handing off to another team.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>A stream-aligned team is aligned to a single, valuable stream of work — a product, a service, a user journey, or a set of features. It has end-to-end ownership: from understanding the problem through to delivering and operating the solution. It is the only team type that should be growing in number as an org scales.</p>
+      <span class="label">Key characteristics</span>
+      <ul>
+        <li>Owns a distinct, coherent slice of value — not a component or layer</li>
+        <li>Self-sufficient enough to deliver without constant cross-team dependencies</li>
+        <li>Rapid feedback loop: discovers, builds, operates, and learns from the same stream</li>
+        <li>Cognitive load is actively managed: scope is bounded to what the team can hold</li>
+        <li>Other team types exist to serve and reduce friction for stream-aligned teams</li>
+      </ul>
+      <span class="label">Anti-patterns</span>
+      <ul>
+        <li>Teams aligned to a technology layer (frontend, backend, database) rather than a value stream</li>
+        <li>Teams that produce outputs for other teams to integrate — that's a component team, not stream-aligned</li>
+        <li>Scope so broad that cognitive load becomes unmanageable and delivery slows</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> Visitor XP, Membership XP, and Trip XP are stream-aligned teams — each owns a distinct customer journey moment end-to-end. iOS and Android as separate teams are not: they are aligned to a technology platform, not a value stream, which is why the Mobile consolidation makes sense.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="team-type">
+    <div class="card-header">
+      <div class="card-title">Platform Team</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-platform">Team Type</span>
+    <div class="card-summary">Provides internal services that reduce cognitive load for stream-aligned teams. Its product is a compelling internal platform consumed via self-service.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>A platform team builds and maintains the foundations that stream-aligned teams depend on. Its goal is to make stream-aligned teams more autonomous by providing reliable, self-service capabilities — so that stream teams can move faster without needing to understand the underlying complexity.</p>
+      <span class="label">Key characteristics</span>
+      <ul>
+        <li>Treats stream-aligned teams as customers: the platform must be usable, reliable, and documented</li>
+        <li>Primary interaction mode is X-as-a-Service — minimal day-to-day collaboration needed</li>
+        <li>Owns the platform's reliability, roadmap, and developer experience</li>
+        <li>Does not own product surfaces directly — it enables the teams that do</li>
+        <li>Should be smaller in number than stream-aligned teams</li>
+      </ul>
+      <span class="label">Anti-patterns</span>
+      <ul>
+        <li>Platform teams that become bottlenecks: every stream team needs to file a ticket to get anything done</li>
+        <li>Platform teams that own too much, creating a single point of failure for the entire org</li>
+        <li>Treating a platform team as a "shared services" team — it should have a product mindset, not a service desk mindset</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> Mobile (iOS + Android foundations), Engagement/Identity (Braze integration layer), and Tardis in its Path B configuration are platform teams. The test: can a stream-aligned team consume what they provide without deep collaboration? If yes, it's working as a platform.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="team-type">
+    <div class="card-header">
+      <div class="card-title">Enabling Team</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-enabling">Team Type</span>
+    <div class="card-summary">Helps stream-aligned and platform teams acquire missing capabilities. Temporary by design — it works itself out of a job.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>An enabling team is a specialist team that helps other teams overcome capability gaps they cannot close alone. It detects where teams are struggling, researches solutions, and actively transfers knowledge back to the teams it supports. The goal is for those teams to no longer need the enabling team.</p>
+      <span class="label">Key characteristics</span>
+      <ul>
+        <li>Facilitating interaction mode — not a permanent dependency</li>
+        <li>Measures success by capability uplift in the teams it helps, not by its own output</li>
+        <li>Does not take over work from other teams — it teaches and enables</li>
+        <li>Has a limited lifespan per engagement: embeds, transfers, withdraws</li>
+        <li>Composed of senior practitioners with strong communication skills</li>
+      </ul>
+      <span class="label">When to use</span>
+      <ul>
+        <li>New technology adoption (e.g. a team needs to learn event-driven architecture)</li>
+        <li>Security or accessibility compliance uplift across multiple teams</li>
+        <li>Introducing a new engineering practice (e.g. continuous delivery, observability)</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> Tardis in the transition period — before it settles into a platform configuration — operates closer to an enabling team than a platform team. It is helping CS-facing teams understand and adopt conversational tooling while the vendor landscape is being evaluated. The distinction matters: if Tardis is enabling, it should plan its own exit.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="team-type">
+    <div class="card-header">
+      <div class="card-title">Complicated Subsystem Team</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-subsystem">Team Type</span>
+    <div class="card-summary">Owns a part of the system requiring deep specialist knowledge that most engineers cannot maintain. Exists to protect other teams from unnecessary complexity.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>A complicated subsystem team owns a component where the knowledge required to maintain or evolve it is so deep and specialised that embedding it within a stream-aligned team would impose an unacceptable cognitive load. Its role is to own the complexity so other teams don't have to.</p>
+      <span class="label">Key characteristics</span>
+      <ul>
+        <li>The subsystem requires specialist skills (e.g. real-time signal processing, video encoding, complex ML pipelines, financial calculation engines)</li>
+        <li>Other teams consume its output via a well-defined API or service boundary</li>
+        <li>Should be small and focused — not a dumping ground for anything complex</li>
+        <li>Interaction mode with stream-aligned teams: primarily X-as-a-Service</li>
+      </ul>
+      <span class="label">Anti-patterns</span>
+      <ul>
+        <li>Creating a complicated subsystem team for something that is merely legacy, not genuinely specialist</li>
+        <li>Using this type to justify keeping fragile, undocumented systems isolated from stream teams who need to understand them</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> DM's Revenue Management System (RMS) — pricing optimization, forecasting, causal inference models — is a genuine complicated subsystem. The ML and optimization expertise required is specialist enough that embedding it in a stream-aligned team would be counterproductive. CXI as a pure analytics team would not qualify; that expertise is distributable.</div>
+    </div>
+  </div>
+
+  <!-- ── INTERACTION MODES ───────────────────────────── -->
+
+  <div class="card" data-category="interaction">
+    <div class="card-header">
+      <div class="card-title">Collaboration Mode</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-collaboration">Interaction Mode</span>
+    <div class="card-summary">Two teams work closely together for a bounded period to discover or build something neither could do alone. Expected to be temporary.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>Collaboration is the highest-bandwidth interaction mode. Two teams work as one, sharing context, decisions, and responsibility for a defined period. It is expensive — it creates dependencies and blurs accountability — so it must be time-bounded and purposeful. The goal is to discover, prototype, or transfer, then return to cleaner boundaries.</p>
+      <span class="label">When to use</span>
+      <ul>
+        <li>Exploring a new technology or architecture where neither team has the full picture</li>
+        <li>Building the first version of an interface that will later become X-as-a-Service</li>
+        <li>Knowledge transfer from a team being dissolved into a new team being formed</li>
+      </ul>
+      <span class="label">When to stop</span>
+      <p>Collaboration that doesn't have an exit plan is a permanent dependency in disguise. If two teams have been in collaboration mode for more than one or two quarters, the design is wrong — the boundary needs to be redrawn, not the collaboration extended.</p>
+      <div class="highlight"><strong>In practice:</strong> The CES/SPS interface during Phase 1 will require temporary collaboration to design the Visitor XP / checkout boundary, the SplitHappens / CXI data contract, and the Emerging Experiences / Conversational XP scope. Each of these should have an explicit exit: a defined interface that both teams can then consume independently.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="interaction">
+    <div class="card-header">
+      <div class="card-title">X-as-a-Service Mode</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-xasaservice">Interaction Mode</span>
+    <div class="card-summary">One team consumes what another provides via a well-defined interface, with minimal day-to-day interaction. The goal to aim for at scale.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>X-as-a-Service is the lowest-friction steady state for inter-team interaction. One team provides a capability — an API, a platform, a data product, a tool — and other teams consume it without needing to understand or collaborate on its internals. The providing team owns the quality, reliability, and developer experience of what it offers.</p>
+      <span class="label">Requirements for this to work</span>
+      <ul>
+        <li>The interface must be stable, well-documented, and versioned</li>
+        <li>The providing team must treat the consuming teams as customers</li>
+        <li>The consuming team must be able to get what they need without raising a ticket or attending a meeting</li>
+        <li>Escalation paths exist but are rarely needed</li>
+      </ul>
+      <span class="label">The organisational goal</span>
+      <p>Teams should be actively designing their interactions to evolve toward X-as-a-Service wherever possible. Collaboration is the exploration phase; X-as-a-Service is the scaled, sustainable state that follows.</p>
+      <div class="highlight"><strong>In practice:</strong> Mobile providing a stable native app foundation that Visitor XP, Trip XP, and Membership XP can build on without platform-level knowledge. Engagement/Identity providing a Braze integration that XP teams consume to send notifications without owning the CRM layer. These are the target states; collaboration is the bridge to get there.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="interaction">
+    <div class="card-header">
+      <div class="card-title">Facilitating Mode</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-facilitating">Interaction Mode</span>
+    <div class="card-summary">One team helps another improve their capabilities, then steps back. The natural mode for enabling teams.</div>
+    <div class="card-body">
+      <span class="label">Definition</span>
+      <p>Facilitating is a one-directional, temporary interaction where one team actively helps another team develop a capability they currently lack. Unlike collaboration, the facilitating team is not co-delivering — it is teaching, coaching, and removing blockers so the other team becomes self-sufficient.</p>
+      <span class="label">Key characteristics</span>
+      <ul>
+        <li>Direction is clear: one team facilitates, the other receives</li>
+        <li>Success is measured by the receiving team's independence, not ongoing engagement</li>
+        <li>The facilitating team should be designing its own exit from day one</li>
+        <li>Typical duration: weeks to a few months, not quarters</li>
+      </ul>
+      <span class="label">Common use cases</span>
+      <ul>
+        <li>An enabling team helping a stream-aligned team adopt a new observability practice</li>
+        <li>A senior platform engineer embedded in a stream team during a difficult migration</li>
+        <li>Security or compliance expertise shared across teams during a certification period</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> During the Phase 1 incubation period, more experienced teams or engineers may need to facilitate newly-formed XP teams as they build their operating rhythms. This should be structured and time-boxed — not a permanent support arrangement that prevents the new teams from developing autonomy.</div>
+    </div>
+  </div>
+
+  <!-- ── ORG DESIGN PRINCIPLES ───────────────────────── -->
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Conway's Law</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">Organizations design systems that mirror their communication structures. The org chart shapes the architecture — whether you intend it or not.</div>
+    <div class="card-body">
+      <span class="label">The law</span>
+      <p>"Any organization that designs a system will produce a design whose structure is a copy of the organization's communication structure." — Melvin Conway, 1968.</p>
+      <p>This is not a choice. It is a constraint. If your teams are organized around technology components, your architecture will be component-shaped. If your teams are organized around customer journeys, your architecture will tend toward journey-shaped services over time.</p>
+      <span class="label">The Inverse Conway Maneuver</span>
+      <p>Skelton and Pais introduce this as a deliberate strategy: <em>restructure the organization first</em> to produce the architecture you want. Rather than trying to redesign the architecture and then hoping the org follows, change the team structure to create the right communication channels — and the architecture will follow.</p>
+      <span class="label">The migration risk</span>
+      <p>When you rename teams without changing the system boundaries they own, Conway's Law still applies to the old structure. Journey-named teams built on a component-shaped codebase will have journey-shaped mandates but component-shaped delivery constraints. The mismatch creates friction that compounds over time.</p>
+      <div class="highlight"><strong>In practice:</strong> The CES codebase is currently shaped like platform teams (iOS, Android, Platinum, etc.). Naming three new teams Visitor XP, Membership XP, and Trip XP does not change the system boundaries those teams inherit. Phase 2 needs an explicit technical boundary migration plan — not just an org chart change — or the new team names will be aspirational labels on component-shaped delivery.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Cognitive Load</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">The amount of mental effort required to do the work. Team topology design is fundamentally about managing cognitive load — keeping it within the team's sustainable capacity.</div>
+    <div class="card-body">
+      <span class="label">Three types</span>
+      <ul>
+        <li><strong>Intrinsic load:</strong> the inherent complexity of the domain itself — the stuff teams must understand to do the work</li>
+        <li><strong>Extraneous load:</strong> unnecessary complexity from poor tools, unclear processes, or organisational friction — should be eliminated</li>
+        <li><strong>Germane load:</strong> the mental effort of learning and building understanding — valuable, should be protected</li>
+      </ul>
+      <span class="label">The design implication</span>
+      <p>Every team has a cognitive load limit. When a team's total scope exceeds that limit, delivery slows, quality drops, and engineers burn out. Platform teams exist specifically to reduce extraneous load for stream-aligned teams. Enabling teams exist to help teams build germane load (domain expertise) faster.</p>
+      <span class="label">Team size as a signal</span>
+      <p>If a team cannot deliver reliably at its current scope, the first question should be: "Is the cognitive load too high?" before adding headcount. More people increases communication overhead, which often increases extraneous load rather than reducing it.</p>
+      <div class="highlight"><strong>In practice:</strong> The CES move from 8 technology-named teams to 3 XP teams + platform + specialist structure is a cognitive load redesign. Each team's scope is narrowed to a coherent, ownable domain. The risk is the transition window: during incubation, teams carry both the old scope and the new mandate simultaneously, which spikes cognitive load before it reduces it.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Team-First Thinking</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">Design the org around the team, not around individuals or projects. Stable teams — not reorganized task forces — are the unit of delivery.</div>
+    <div class="card-body">
+      <span class="label">The principle</span>
+      <p>Skelton and Pais argue that the team — not the individual, not the project, not the initiative — is the fundamental unit of software delivery. Teams need stability, identity, and time to develop trust and shared context before they can perform. Constantly reorganising teams around projects destroys the accumulated social capital that makes high performance possible.</p>
+      <span class="label">Dunbar's number and team size</span>
+      <p>Optimal team size is 5–8 people (never more than ~15). Above 15, communication patterns break down and informal coordination is replaced by process overhead. This is not a preference — it is a function of human cognitive limits on the number of relationships we can maintain with high trust.</p>
+      <span class="label">Implications for org design</span>
+      <ul>
+        <li>Teams should be long-lived; work flows to the team, not the other way around</li>
+        <li>Individual moves between teams should be deliberate, not frequent</li>
+        <li>New teams need a formation period before they can take on full load — do not skip incubation</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> The incubation-before-final-state principle in the CES target org is team-first thinking in practice. New XP teams form, prove their model, then absorb capacity. The risk: if the incubation period is cut short under delivery pressure, the new teams never build the identity and trust they need to function at full capacity.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Fast Flow</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">The ultimate measure of a good team topology. Can the organisation move value from idea to customer quickly, safely, and sustainably?</div>
+    <div class="card-body">
+      <span class="label">The goal of Team Topologies</span>
+      <p>Skelton and Pais frame the entire book around one question: how do you design an organisation that enables fast flow of value to customers? Every topology decision — which team types to use, which interaction modes to apply — should be evaluated against its impact on flow.</p>
+      <span class="label">What blocks flow</span>
+      <ul>
+        <li>Cross-team dependencies that require coordination before delivering</li>
+        <li>Cognitive load that prevents teams from moving quickly in their domain</li>
+        <li>Unclear ownership that creates waiting, rework, or decision paralysis</li>
+        <li>Collaboration mode that is never resolved into X-as-a-Service</li>
+        <li>Platform teams that are bottlenecks rather than accelerators</li>
+      </ul>
+      <span class="label">Measuring flow</span>
+      <p>Flow metrics include lead time (idea to production), deployment frequency, change failure rate, and time to restore. These are the DORA metrics. They are not team-level metrics — they are org-level signals of how well the topology is working.</p>
+      <div class="highlight"><strong>In practice:</strong> The CES target org is explicitly designed to improve flow: removing the cross-team dependencies created by technology-named teams, giving XP teams end-to-end ownership so they don't need to coordinate before delivering. The test of whether Phase 2 worked is not the org chart — it is whether lead time for customer-facing changes improves in 2027.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Team API</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">Every team has an interface — the set of ways other teams can interact with it. Making this explicit reduces friction and prevents invisible dependencies.</div>
+    <div class="card-body">
+      <span class="label">What is a Team API?</span>
+      <p>Just as a software API defines how systems interact, a Team API defines how teams interact. It includes: the code and services the team owns; the documentation and runbooks it maintains; the communication channels it monitors; the practices it expects when consuming its outputs; and the hours and response time it commits to.</p>
+      <span class="label">Why it matters</span>
+      <p>Without an explicit Team API, interactions happen ad-hoc, inconsistently, and at the cost of the consuming team's productivity. Defining the API forces the providing team to think about its consumers' experience — not just its own delivery.</p>
+      <span class="label">Components</span>
+      <ul>
+        <li><strong>Code/services:</strong> what the team owns and operates</li>
+        <li><strong>Versioning:</strong> how changes are communicated and backwards compatibility is managed</li>
+        <li><strong>Docs:</strong> where to find what you need without asking</li>
+        <li><strong>Practices:</strong> what consuming teams need to do to work with this team's outputs</li>
+        <li><strong>Communication:</strong> how to reach the team and what SLAs apply</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> The CES/SPS boundary — Visitor XP consuming SPS checkout via hybrid WebViews — needs a Team API from SPS: what the interface guarantees, how changes are communicated, and how Visitor XP raises issues without creating an ad-hoc dependency. The same applies to the Engagement/Identity team's Braze integration consumed by Membership XP.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Organizational Sensing</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">Teams and leaders must actively sense whether the current topology is working — and evolve it when it isn't. Org design is never done.</div>
+    <div class="card-body">
+      <span class="label">The principle</span>
+      <p>Skelton and Pais reject the idea of a permanent org structure. Teams, interaction modes, and topologies should evolve as the product, technology, and market change. The job of leadership is not to design the right org once — it is to build the sensing capability to know when the current design is no longer fit for purpose, and the organisational willingness to change it.</p>
+      <span class="label">Signals that a topology needs to evolve</span>
+      <ul>
+        <li>A team's cognitive load is consistently too high — scope is too broad</li>
+        <li>Collaboration mode between two teams is never resolving into X-as-a-Service</li>
+        <li>A team is regularly blocked by another team — dependency is structural, not incidental</li>
+        <li>An enabling team is becoming a permanent support function</li>
+        <li>Flow metrics are deteriorating despite headcount growth</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> The Phase 3 "stabilization and graduation" step in both CES and SPS is an instance of organisational sensing — explicitly scheduling a review of whether the incubated teams have found their shape, whether the interaction modes are working, and whether the topology needs adjustment. This should not be a one-time event; it should become a regular practice.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="principle">
+    <div class="card-header">
+      <div class="card-title">Topology Evolution</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-principle">Org Design Principle</span>
+    <div class="card-summary">Teams and their interaction modes should change as products and organisations mature. What is right at scale-up is wrong at scale.</div>
+    <div class="card-body">
+      <span class="label">The lifecycle of a topology</span>
+      <p>Skelton and Pais describe how the right topology changes as an organisation grows and its product matures. Early-stage: collaboration is high, boundaries are fuzzy, enabling teams are everywhere. Mature-stage: X-as-a-Service dominates, stream-aligned teams operate autonomously, platform teams are stable and self-service. The mistake is applying a mature-stage topology to an early-stage product, or vice versa.</p>
+      <span class="label">Common evolution patterns</span>
+      <ul>
+        <li>Component team → stream-aligned team (once the component is stable enough to be consumed as a service)</li>
+        <li>Collaboration → X-as-a-Service (once the interface is defined and stable)</li>
+        <li>Enabling team → disbanded (once the capability it transferred is self-sustaining)</li>
+        <li>Stream-aligned team → complicated subsystem team (if a capability within it becomes too specialist for the whole team to maintain)</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> Tardis's trajectory is a textbook topology evolution: currently resourced as a product team (collaboration-heavy, UX-led), transitioning toward a platform team (X-as-a-Service, enabling CS tooling), with a conditional Path A where it becomes a stream-aligned Conversational XP team if the hypothesis validates. Each step is a topology evolution triggered by organisational sensing.</div>
+    </div>
+  </div>
+
+  <!-- ── SUPPORTING CONCEPTS ─────────────────────────── -->
+
+  <div class="card" data-category="supporting">
+    <div class="card-header">
+      <div class="card-title">Reverse Conway Maneuver</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-supporting">Supporting Concept</span>
+    <div class="card-summary">Deliberately restructure the organisation to produce the architecture you want. Change the communication lines first; the system design will follow.</div>
+    <div class="card-body">
+      <span class="label">The strategy</span>
+      <p>If Conway's Law says the org chart shapes the architecture, the Reverse Conway Maneuver says: use that causality deliberately. Instead of designing the system and then hoping the organisation aligns, restructure the teams first to create the communication channels that will produce the desired architecture. The architecture becomes the consequence, not the goal.</p>
+      <span class="label">How to apply it</span>
+      <ul>
+        <li>Identify the target architecture (e.g. independent, loosely-coupled services per customer journey)</li>
+        <li>Design the team structure that would naturally produce that architecture</li>
+        <li>Restructure teams to match — the system design will follow as teams build what is within their scope</li>
+        <li>Plan the technical boundary migration: team restructure alone does not move code</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> The CES target org is explicitly a Reverse Conway Maneuver. The desired architecture is journey-shaped services (Visitor, Membership, Trip) with platform foundations underneath. Creating XP teams and dissolving component teams is the org-level move that creates the conditions for the codebase to evolve in the same direction — but only if the technical boundary migration is planned alongside the team restructure.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="supporting">
+    <div class="card-header">
+      <div class="card-title">Team Boundaries and Ownership</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-supporting">Supporting Concept</span>
+    <div class="card-summary">Clear ownership boundaries are a prerequisite for fast flow. Ambiguity at boundaries creates coordination overhead and accountability gaps.</div>
+    <div class="card-body">
+      <span class="label">Why boundaries matter</span>
+      <p>Every moment a team has to ask "is this ours to decide?" is friction. Every moment two teams both think they own something is a conflict waiting to happen. Clear boundaries — what this team owns, what it doesn't, and where the interface with adjacent teams sits — are not bureaucratic overhead. They are what makes autonomous delivery possible.</p>
+      <span class="label">Boundary design principles</span>
+      <ul>
+        <li>Boundaries should follow value flow, not technology layers</li>
+        <li>Boundary ambiguity between two teams is a signal that the topology needs adjustment</li>
+        <li>Interface agreements (Team APIs) should make boundaries explicit and operable</li>
+        <li>When a boundary shifts, both teams must agree — unilateral boundary claims create conflict</li>
+      </ul>
+      <span class="label">The "fracture plane" concept</span>
+      <p>Skelton and Pais describe natural fracture planes — points in a system where it is safe and clean to split teams. Good fracture planes follow domain boundaries, customer segments, regulatory boundaries, or change cadence differences. Bad fracture planes follow technology layers.</p>
+      <div class="highlight"><strong>In practice:</strong> The SPS "after-sales" / CES "Trip XP" boundary is an undrawn fracture plane. Both teams are approaching the same customer moment from different mandates. Leaving it implicit means it will be resolved by whoever builds first — which is not the same as resolving it correctly.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="supporting">
+    <div class="card-header">
+      <div class="card-title">Thinnest Viable Platform</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-supporting">Supporting Concept</span>
+    <div class="card-summary">A good internal platform is the smallest thing that genuinely reduces cognitive load for stream-aligned teams. Build only what earns its keep.</div>
+    <div class="card-body">
+      <span class="label">The principle</span>
+      <p>Platform teams are tempted to build comprehensive, feature-rich internal platforms. Skelton and Pais argue the opposite: a platform should be the thinnest possible layer that reduces cognitive load for the teams consuming it. Every feature of a platform has a maintenance cost. Build only what stream-aligned teams actually need and will use.</p>
+      <span class="label">What qualifies</span>
+      <ul>
+        <li>Reduces a genuine cognitive load (teams would otherwise have to understand something complex themselves)</li>
+        <li>Is consumed self-service without requiring collaboration with the platform team</li>
+        <li>Has a stable, versioned interface that consuming teams can rely on</li>
+        <li>Is actually used — if no stream-aligned team uses it, it does not belong on the platform</li>
+      </ul>
+      <span class="label">Anti-patterns</span>
+      <ul>
+        <li>"Build it and they will come" platforms that stream teams avoid because they are harder to use than rolling their own</li>
+        <li>Platforms that solve the platform team's problems, not the stream teams' problems</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> Mobile as a platform team should provide only what XP teams genuinely cannot manage themselves: the native app foundations, device integration layer, and app store machinery. It should not own product surfaces on behalf of XP teams — that crosses into being a stream-aligned team. The platform boundary is defined by what reduces cognitive load, not by what Mobile currently builds.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="supporting">
+    <div class="card-header">
+      <div class="card-title">Stream Alignment and Domain Design</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-supporting">Supporting Concept</span>
+    <div class="card-summary">Choosing what each stream-aligned team is aligned to is the most consequential org design decision. Get the domain wrong and everything downstream is harder.</div>
+    <div class="card-body">
+      <span class="label">What to align to</span>
+      <p>Stream-aligned teams can be aligned to: a business domain (e.g. loyalty), a customer journey segment (e.g. post-trip), a user persona, a geographic market, or a product capability. The right choice depends on where the organisation needs independent flow — where the cost of cross-team coordination is highest.</p>
+      <span class="label">Domain Driven Design connection</span>
+      <p>Team Topologies draws heavily on Domain Driven Design (DDD) concepts, particularly bounded contexts. Each stream-aligned team should map to a bounded context — a domain with its own language, model, and rules that does not bleed into adjacent domains. When a team's domain is too large or too fuzzy, it is usually because the bounded context has not been drawn correctly.</p>
+      <span class="label">Alignment options for product organisations</span>
+      <ul>
+        <li>Customer journey segment (Visitor → Membership → Trip) — best for customer-centric orgs</li>
+        <li>Product capability (search, payments, notifications) — creates component teams, not recommended at scale</li>
+        <li>User persona or segment (B2C, B2B, partner) — useful when different users have genuinely different needs</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> CES's choice to align XP teams to customer journey segments (Visitor, Membership, Trip) rather than user personas or product capabilities is a deliberate domain design decision. The risk: a single customer is a Visitor who becomes a Member who books a Trip — three bounded contexts, one person. The cross-journey interaction model (communities of practice, shared metrics) is the design for that seam.</div>
+    </div>
+  </div>
+
+  <div class="card" data-category="supporting">
+    <div class="card-header">
+      <div class="card-title">Interaction Mode Detection</div>
+      <div class="card-toggle">+</div>
+    </div>
+    <span class="card-tag tag-supporting">Supporting Concept</span>
+    <div class="card-summary">Recognizing which interaction mode is actually operating — vs. which should be — is a key diagnostic for org dysfunction.</div>
+    <div class="card-body">
+      <span class="label">The diagnostic</span>
+      <p>Skelton and Pais argue that many org problems are actually interaction mode mismatches: a team is operating in ad-hoc collaboration when it should have moved to X-as-a-Service; a team is delivering a service when it should be enabling; an enabling team has become a permanent crutch. Naming the actual interaction mode versus the intended one surfaces the problem precisely.</p>
+      <span class="label">Common mismatches</span>
+      <ul>
+        <li><strong>Permanent collaboration:</strong> two teams that can't move to X-as-a-Service because the interface is never clean enough — usually signals a boundary problem, not a people problem</li>
+        <li><strong>Platform as gatekeeper:</strong> consuming teams have to collaborate with the platform team to get anything done — the platform is not self-service</li>
+        <li><strong>Enabling that never exits:</strong> an enabling team that keeps getting pulled back because the receiving team never built real capability — usually signals a hiring or coaching problem</li>
+      </ul>
+      <div class="highlight"><strong>In practice:</strong> The SplitHappens (SPS) / CXI (CES) relationship is currently undefined — which means it defaults to ad-hoc collaboration. Naming the intended interaction mode forces a design decision: should SplitHappens provide analytics as X-as-a-Service to CXI, or should they co-own the experimentation platform in collaboration? Neither is wrong — but leaving it unnamed means it will default to the most convenient option, which is usually the most expensive one.</div>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+<div class="footer">
+  Notes based on Skelton, M. &amp; Pais, M. (2019). <em>Team Topologies: Organizing Business and Technology Teams for Fast Flow.</em> IT Revolution Press.<br>
+  For personal reference use only.
+</div>
+
+<script>
+  // Filter logic
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      let visible = 0;
+      cards.forEach(card => {
+        const match = filter === 'all' || card.dataset.category === filter;
+        card.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+
+      const badge = document.getElementById('badge-all');
+      if (filter === 'all' && badge) badge.textContent = visible;
+    });
+  });
+
+  // Expand/collapse
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.toggle('open');
+    });
+  });
+</script>
+</body>
+</html>
